@@ -2,8 +2,8 @@
 require('@rushstack/eslint-patch/modern-module-resolution')
 
 module.exports = {
-  root: true,
-  'extends': [
+  root: false, // << true(to work) (to stop)
+  extends: [
     'plugin:vue/vue3-essential',
     'eslint:recommended',
     '@vue/eslint-config-prettier/skip-formatting'

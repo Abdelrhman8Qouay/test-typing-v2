@@ -1,5 +1,11 @@
 import './assets/main.css'
 
+import {} from './utils'
+// import { Game, UI, KeyboardI } from './classes'; // Import classes here
+// let gameGame = new Game();
+// let gameGam = new UI();
+// let gameGa = new KeyboardI();
+
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 

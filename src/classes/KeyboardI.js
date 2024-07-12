@@ -1,5 +1,8 @@
-// Keyboard Interface
-class KeyboardI {
+//======================== import what need it ========================
+import { addClass, removeClass, capitalizeFirstChar } from '../utils'
+
+// ======================== Keyboard Interface ========================
+export class KeyboardI {
   static charToKeyCodeMap = {
     a: 'KeyA',
     b: 'KeyB',
@@ -154,6 +157,7 @@ class KeyboardI {
       // check if this key is (upper or special) character -> (activate the [shiftLeft or shiftRight] with the current char)
       if (
         (/[A-Z]/.test(gameObj.current_para_content[char_index]) ||
+          // eslint-disable-next-line no-useless-escape
           /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/.test(
             gameObj.current_para_content[char_index]
           )) &&
