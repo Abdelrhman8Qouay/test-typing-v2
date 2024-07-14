@@ -11,8 +11,10 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "aos": "^2.3.4",
     "pinia": "^2.1.7",
     "vue": "^3.4.29",
+    "vue-material-design-icons": "^5.3.0",
     "vue-router": "^4.3.3"
   },
   "devDependencies": {
@@ -26,6 +28,7 @@
     "prettier": "^3.2.5",
     "sass": "^1.77.8",
     "tailwindcss": "^3.4.4",
-    "vite": "^5.3.1"
+    "vite": "^5.3.1",
+    "vite-plugin-compression": "^0.5.1"
   }
 }
