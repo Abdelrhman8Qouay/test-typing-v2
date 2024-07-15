@@ -75,17 +75,46 @@ export async function fetchData(filePath) {
     }
 }
 
-// ===================== For Vue =====================
-export function getImageUrl(urlName) {
-    return new URL(`../${urlName}`, import.meta.url).href
+// ==================== functions for DOM ====================
+// --------------- Input Process ---------------
+// focus the input
+export function focusInput(eleInput) {
+    eleInput.focus()
+}
+// scroll the container to active letter
+export function scrollToActiveLetter(paraContainerEle) {
+    const activeLetter = paraContainerEle.querySelector('.letter-active')
+    console.log('scroll here')
+
+    if (activeLetter) {
+        // Calculate the position to scroll to
+        const containerRect = paraContainerEle.getBoundingClientRect()
+        const activeLetterRect = activeLetter.getBoundingClientRect()
+
+        // Calculate the horizontal scroll position to center the active letter
+        const scrollLeft = activeLetterRect.left - containerRect.left + paraContainerEle.scrollLeft - containerRect.width / 2 + activeLetterRect.width / 2
+
+        // Smoothly scroll the container to the calculated position
+        paraContainerEle.scrollTo({
+            left: scrollLeft,
+            behavior: 'smooth'
+        })
+    }
 }
 
 export function makeNoScroll(ifTrue) {
+    let body = document.body
     if (ifTrue) {
-        document.body.classList.add('noscroll')
+        // if true >> make No scroll
+        addClass(body, 'noscroll')
     } else {
-        document.body.classList.remove('noscroll')
+        removeClass(body, 'noscroll')
     }
+}
+
+// ==================== FUnctions for Vue ====================
+export function getImageUrl(urlName) {
+    return new URL(`../${urlName}`, import.meta.url)
 }
 
 export function sleep(milliseconds) {

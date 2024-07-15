@@ -1,5 +1,5 @@
 //======================== import what need it ========================
-import { addClass, removeClass, hasClass, config } from '../utils'
+import { addClass, removeClass, hasClass } from '../utils'
 // import Game from './Game'
 import KeyboardI from './KeyboardI'
 

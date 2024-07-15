@@ -1,5 +1,5 @@
 //======================== import what need it ========================
-import { addClass, removeClass, hasClass, playAudio, pauseEle, isSpaceChar, config } from '../utils'
+import { addClass, removeClass, hasClass, playAudio, pauseEle, isSpaceChar } from '../utils'
 import KeyboardI from './KeyboardI'
 import UI from './UI'
 
