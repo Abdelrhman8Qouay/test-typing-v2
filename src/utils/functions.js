@@ -5,10 +5,10 @@ export function playAudio(aud, audioLoop) {
 
     if (audioLoop) {
         aud.addEventListener('ended', onAudioEnded)
+        aud.preload = 'auto' // Preload the audio
     }
 
     aud.volume = 0.4
-    aud.preload = 'auto' // Preload the audio
 
     aud.play().catch(() => {
         aud.pause()
@@ -59,6 +59,15 @@ export function removeClass(el, className) {
     else if (hasClass(el, className)) {
         var reg = new RegExp('(\\s|^)' + className + '(\\s|$)')
         el.className = el.className.replace(reg, ' ')
+    }
+}
+
+export function toggleClass(el, className) {
+    if (el.classList) el.classList.toggle(className)
+    else {
+        if (hasClass(el, className)) {
+            removeClass(el, className)
+        } else addClass(el, className)
     }
 }
 

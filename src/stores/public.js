@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 
-import { getImageUrl } from '../utils'
+import { getImageUrl, hasClass } from '../utils'
 
 export const usePublicStore = defineStore('public', () => {
     const sound_click = {
@@ -9,5 +9,7 @@ export const usePublicStore = defineStore('public', () => {
         click: new Audio(getImageUrl('assets/sound/clicks/click.mp3'))
     }
 
-    return { sound_click }
+    const isDarkMode = ref(hasClass(document.body, 'darkMode'))
+
+    return { isDarkMode, sound_click }
 })

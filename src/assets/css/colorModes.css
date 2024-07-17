@@ -1,0 +1,252 @@
+.darkMode {
+    --bg: #1f1f1f; /* hidden */
+    --main: #f2c17b;
+    --caret: #e3dce0; /* less than main */
+    --text: #768f95; /* text color */
+    --sub: #141414; /* sub alt color */
+    --highlight: #d2dff4; /* highlight color */
+    --error: #cc241d;
+    --error-extra: #9d0006;
+}
+
+.cyberspaceMode {
+    --bg: #181c18; /* hidden */
+    --main: #00ce7c;
+    --caret: #00ce7c; /* less than main */
+    --text: #9578d3; /* text color */
+    --sub: #131613; /* sub alt color */
+    --highlight: #c2fbe1; /* highlight color */
+    --error: #ff5f5f;
+    --error-extra: #d22a2a;
+}
+
+.midnightMode {
+    --bg: #0b0e13; /* hidden */
+    --main: #60759f;
+    --caret: #60759f; /* less than main */
+    --text: #394760; /* text color */
+    --sub: #141a24; /* sub alt color */
+    --highlight: #9fadc6; /* highlight color */
+    --error: #c27070;
+    --error-extra: #c28b70;
+}
+
+.paperMode {
+    --bg: #eeeeee; /* hidden */
+    --main: #444444;
+    --caret: #444444; /* less than main */
+    --text: #b2b2b2; /* text color */
+    --sub: #dddddd; /* sub alt color */
+    --highlight: #444444; /* highlight color */
+    --error: #cc241d;
+    --error-extra: #9d0006;
+}
+
+.desertOasisMode {
+    --bg: #fff2d5; /* hidden */
+    --main: #d19d01;
+    --caret: #3a87fe; /* less than main */
+    --text: #0061fe; /* text color */
+    --sub: #eddebc; /* sub alt color */
+    --highlight: #332800; /* highlight color */
+    --error: #76bb40;
+    --error-extra: #4e7a27;
+}
+
+.matrixMode {
+    --bg: #000000; /* hidden */
+    --main: #15ff00;
+    --caret: #15ff00; /* less than main */
+    --text: #006500; /* text color (sub when copy) */
+    --sub: #032000; /* sub alt color */
+    --highlight: #d1ffcd; /* highlight color */
+    --error: #da3333;
+    --error-extra: #791717;
+}
+
+.devMode {
+    --bg: #1b2028; /* hidden */
+    --main: #23a9d5;
+    --caret: #4b5975; /* less than main */
+    --text: #4b5975; /* text color (sub when copy) */
+    --sub: #151a21; /* sub alt color */
+    --highlight: #ccccb5; /* highlight color */
+    --error: #b81b2c;
+    --error-extra: #84131f;
+}
+
+.discordMode {
+    --bg: #313338; /* hidden */
+    --main: #5a65ea;
+    --caret: #5a65ea; /* less than main */
+    --text: #565861; /* text color (sub when copy) */
+    --sub: #2b2d31; /* sub alt color */
+    --highlight: #dcdee3; /* highlight color */
+    --error: #df4f4b;
+    --error-extra: #df4f4b;
+}
+
+.laserMode {
+    --bg: #221b44; /* hidden */
+    --main: #009eaf;
+    --caret: #009eaf; /* less than main */
+    --text: #b82356; /* text color (sub when copy) */
+    --sub: #1e173b; /* sub alt color */
+    --highlight: #dbe7e8; /* highlight color */
+    --error: #a8d400;
+    --error-extra: #668000;
+}
+
+.vscodeMode {
+    --bg: #1e1e1e; /* hidden */
+    --main: #007acc;
+    --caret: #569cd6; /* less than main */
+    --text: #4d4d4d; /* text color (sub when copy) */
+    --sub: #191919; /* sub alt color */
+    --highlight: #d4d4d4; /* highlight color */
+    --error: #f44747;
+    --error-extra: #f44747;
+}
+
+.wavesMode {
+    --bg: #1c292f; /* hidden */
+    --main: #6bde3b;
+    --caret: #6bde3b; /* less than main */
+    --text: #1f5e6b; /* text color (sub when copy) */
+    --sub: #1b3238; /* sub alt color */
+    --highlight: #e9efe6; /* highlight color */
+    --error: #ca4754;
+    --error-extra: #7e2a33;
+}
+
+.vocMode {
+    --bg: #190618; /* hidden */
+    --main: #e0caac;
+    --caret: #e0caac; /* less than main */
+    --text: #4c1e48; /* text color (sub when copy) */
+    --sub: #2c0c28; /* sub alt color */
+    --highlight: #eeeae4; /* highlight color */
+    --error: #af3735;
+    --error-extra: #7e2a29;
+}
+
+.taroMode {
+    --bg: #b3baff; /* hidden */
+    --main: #130f1a;
+    --caret: #00e9e5; /* less than main */
+    --text: #6f6c91; /* text color (sub when copy) */
+    --sub: #a3a7df; /* sub alt color */
+    --highlight: #130f1a; /* highlight color */
+    --error: #af3735;
+    --error-extra: #7e2a29;
+}
+
+.superuserMode {
+    --bg: #262a33; /* hidden */
+    --main: #43ffaf;
+    --caret: #43ffaf; /* less than main */
+    --text: #526777; /* text color (sub when copy) */
+    --sub: #1f232c; /* sub alt color */
+    --highlight: #e5f7ef; /* highlight color */
+    --error: #ff5f5f;
+    --error-extra: #d22a2a;
+}
+
+.strawberryMode {
+    --bg: #f37f83; /* hidden */
+    --main: #fcfcf8;
+    --caret: #fcfcf8; /* less than main */
+    --text: #e53c58; /* text color (sub when copy) */
+    --sub: #ef6e77; /* sub alt color */
+    --highlight: #fcfcf8; /* highlight color */
+    --error: #fcd23f;
+    --error-extra: #d7ae1e;
+}
+
+.stealthMode {
+    --bg: #010203; /* hidden */
+    --main: #383e42;
+    --caret: #e25303; /* less than main */
+    --text: #5e676e; /* text color (sub when copy) */
+    --sub: #121212; /* sub alt color */
+    --highlight: #383e42; /* highlight color */
+    --error: #e25303;
+    --error-extra: #73280c;
+}
+
+.sonokaiMode {
+    --bg: #2c2e34; /* hidden */
+    --main: #9ed072;
+    --caret: #f38c71; /* less than main */
+    --text: #e7c664; /* text color (sub when copy) */
+    --sub: #232429; /* sub alt color */
+    --highlight: #e2e2e3; /* highlight color */
+    --error: #fc5d7c;
+    --error-extra: #ecac6a;
+}
+
+.sewingTinLightMode {
+    --bg: #ffffff; /* hidden */
+    --main: #2d2076;
+    --caret: #fbdb8c; /* less than main */
+    --text: #385eca; /* text color (sub when copy) */
+    --sub: #c8cedf; /* sub alt color */
+    --highlight: #2d2076; /* highlight color */
+    --error: #f2ce83;
+    --error-extra: #f2ce83;
+}
+
+.reposeLightMode {
+    --bg: #efead0; /* hidden */
+    --main: #5f605e;
+    --caret: #5f605e; /* less than main */
+    --text: #8f8e84; /* text color (sub when copy) */
+    --sub: #dbd6c4; /* sub alt color */
+    --highlight: #333538; /* highlight color */
+    --error: #c43c53;
+    --error-extra: #a52632;
+}
+
+.redSamuraiMode {
+    --bg: #84202c; /* hidden */
+    --main: #c79e6e;
+    --caret: #c79e6e; /* less than main */
+    --text: #55131b; /* text color (sub when copy) */
+    --sub: #55131b; /* sub alt color */
+    --highlight: #e2dad0; /* highlight color */
+    --error: #33bbda;
+    --error-extra: #176b79;
+}
+
+.peachesMode {
+    --bg: #e0d7c1; /* hidden */
+    --main: #dd7a5f;
+    --caret: #dd7a5f; /* less than main */
+    --text: #e7b28e; /* text color (sub when copy) */
+    --sub: #e2caaf; /* sub alt color */
+    --highlight: #5f4c41; /* highlight color */
+    --error: #ff6961;
+    --error-extra: #c23b22;
+}
+
+.pastelMode {
+    --bg: #e0b2bd; /* hidden */
+    --main: #fbf4b6;
+    --caret: #fbf4b6; /* less than main */
+    --text: #b4e9ff; /* text color (sub when copy) */
+    --sub: #d29fab; /* sub alt color */
+    --highlight: #6d5c6f; /* highlight color */
+    --error: #ff6961;
+    --error-extra: #c23b22;
+}
+
+.modernInkMode {
+    --bg: #ffffff; /* hidden */
+    --main: #ff360d;
+    --caret: #ff0000; /* less than main */
+    --text: #b7b7b7; /* text color (sub when copy) */
+    --sub: #ececec; /* sub alt color */
+    --highlight: #000000; /* highlight color */
+    --error: #d70000;
+    --error-extra: #b00000;
+}

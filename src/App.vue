@@ -17,5 +17,12 @@ import Navbar from './components/Main/Navbar.vue'
 
 
 <style lang="scss">
-// @import './assets/css/mixins';
+@import './assets/css/mixins';
+
+#app,
+.app {
+    background: var(--bg);
+    @include wh-screen;
+    overflow: auto;
+}
 </style>

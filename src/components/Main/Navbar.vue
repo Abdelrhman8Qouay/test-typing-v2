@@ -1,284 +1,169 @@
 
 <template>
-    <nav class="NavbarComp">
-        <!-- Top Navbar -->
-        <div class="w-full h-max p-3 flex flex-col items-center justify-end gap-3">
-            <div class="topLab">
-                <div class="nav-above max-lg:hidden w-full flex items-center gap-2 p-2">
-                    <RouterLink :class="{ active: $route.path === '/' }" to="/" @click="openTab = false">HOME </RouterLink>
-                    <RouterLink :class="{ active: $route.path === '/about' }" to="/about" @click="openTab = false"> ABOUT </RouterLink>
-                    <RouterLink :class="{ active: $route.path === '/contact' }" to="/contact" @click="openTab = false"> CONTACT </RouterLink>
+    <nav class="navbar">
+        <div class="container">
+            <div class="left">
+                <div class="logo">
+                    <img src="@/assets/logo.svg" alt="logo page" />
                 </div>
-                <Menu fillColor="#fff" :size="40" @click="openTab = !openTab" class="lg:hidden transition-transform ease-in duration-200" :class="{ 'rotate-180': openTab }" />
+                <!-- Navbar Content -->
+                <div class="nav-above gap-2 p-2">
+                    <RouterLink :class="{ active: $route.path === '/' }" to="/" @click="openTab = false"><KeyboardVariant /></RouterLink>
+                    <RouterLink :class="{ active: $route.path === '/about' }" to="/about" @click="openTab = false"><InformationVariant /></RouterLink>
+                    <RouterLink :class="{ active: $route.path === '/contact' }" to="/contact" @click="openTab = false"><Cogs /></RouterLink>
+                </div>
+            </div>
+            <div class="right">
+                <div class="relative" tabindex="0">
+                    <span
+                        class="flex justify-center items-center opt font-sans"
+                        @click.self="open_color_mode_menu = !open_color_mode_menu"
+                        :class="open_color_mode_menu ? '!text-[var(--highlight)]' : ''"
+                    >
+                        <ThemeLightDark class="mx-1 inline-block" />
+                        {{ settingStore.curr_color_mode }}</span
+                    >
+                    <ul
+                        class="absolute top-full right-0 w-[25vw] max-h-[70vh] overflow-y-auto rounded-md m-0 transition-all duration-200 z-[5000] bg-[var(--sub)] shadow shadow-[var(--caret)]"
+                        :class="open_color_mode_menu ? 'visible opacity-100' : 'invisible opacity-0'"
+                    >
+                        <li
+                            class="list-none py-1 px-2 cursor-pointer flex text-[var(--text)] hover:text-[var(--highlight)] hover:bg-[var(--text)]"
+                            v-for="(val, i) in Object.keys(settingStore.color_modes)"
+                            :key="i"
+                            :tabindex="i"
+                            @click="settingStore.toggleMode(val)"
+                        >
+                            <div class="balls flex justify-items-start items-center gap-1 bg-[var(--sub)] mx-1 p-1 px-2 rounded-md" :class="settingStore.color_modes[val]">
+                                <div class="ball w-4 h-4 bg-[var(--main)] rounded-full"></div>
+                                <div class="ball w-4 h-4 bg-[var(--text)] rounded-full"></div>
+                                <div class="ball w-4 h-4 bg-[var(--highlight)] rounded-full"></div>
+                            </div>
+                            <span>{{ val }}</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
-
-        <!-- Menu Tab -->
-        <transition name="tab">
-            <div v-if="openTab" class="w-full h-full fixed flex justify-center items-center top-0 left-0 bg-[rgba(72,72,72,1)] z-[28000]">
-                <div class="nav w-full mx-auto flex flex-col items-center gap-5 pt-5 p-7">
-                    <RouterLink :class="{ active: $route.path === '/' }" to="/" @click="openTab = false">HOME </RouterLink>
-                    <RouterLink :class="{ active: $route.path === '/about' }" to="/about" @click="openTab = false"> ABOUT </RouterLink>
-                    <RouterLink :class="{ active: $route.path === '/contact' }" to="/contact" @click="openTab = false"> CONTACT </RouterLink>
-                </div>
-            </div>
-        </transition>
-
-        <!-- <SettingButton class="hovered" ico="facebook" :ico-size="20" shadow-color="white" :url="all_links[0]['facebook']" />
-            <SettingButton class="hovered" ico="twitter" :ico-size="20" shadow-color="white" :url="all_links[0]['twitter']" />
-            <SettingButton class="hovered" ico="linkedin" :ico-size="20" shadow-color="white" :url="all_links[0]['linkedin']" />
-            <SettingButton class="hovered" ico="github" :ico-size="20" shadow-color="white" :url="all_links[0]['github']" /> -->
     </nav>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 
-import data_links from '@/data/links.json'
-const all_links = ref(null)
-onMounted(() => (all_links.value = data_links))
+// ===================== Stores =====================
+import { usePublicStore } from '@/stores/public'
+import { useSettingStore } from '@/stores/setting'
+const publicStore = usePublicStore()
+const settingStore = useSettingStore()
 
 // ========================== get icons ==========================
-import Menu from 'vue-material-design-icons/Menu.vue'
-import Cog from 'vue-material-design-icons/Cog.vue'
+import KeyboardVariant from 'vue-material-design-icons/KeyboardVariant.vue'
+import InformationVariant from 'vue-material-design-icons/InformationVariant.vue'
+import Cogs from 'vue-material-design-icons/Cogs.vue'
+import ThemeLightDark from 'vue-material-design-icons/ThemeLightDark.vue'
 
-// ========================== get components ==========================
-
-// ========================== Main Options ==========================
-const openTab = ref(false)
+// ========================== Process ==========================
+let open_color_mode_menu = ref(false)
 </script>
 
 <style lang="scss" scoped>
-// =============== Animated ===============
-.tab-enter-active {
-    transform-origin: top;
-    animation: openNav 2.5s cubic-bezier(0.5, 0.2, 0.2, -0.1);
-    z-index: 28000;
-}
-
-.tab-leave-active {
-    transform-origin: top;
-    transform: scaleY(0);
-    transition: transform 0.38s ease-in;
-    z-index: 28000;
-}
-
-.tab-enter-from {
-    transform-origin: top;
-    transform: scaleY(0);
-}
-
-.setting-enter-active {
-    transform-origin: top;
-    animation: openNav 2.5s cubic-bezier(0.5, 0.2, 0.2, -0.1);
-    z-index: 28000;
-}
-
-.setting-leave-active {
-    transform-origin: top;
-    transform: scaleY(0);
-    transition: transform 0.38s ease-in;
-    z-index: 28000;
-}
-
-.setting-enter-from {
-    transform-origin: top;
-    transform: scaleY(0);
-}
-
-.hovered {
-    &:hover {
-        transform: translateX(10px);
-        transition: all 0.32s;
-    }
-}
+@import '../../assets/css/mixins.scss';
 
 // =============== Styles ===============
 .active-nav {
-    width: 100%;
-    height: 100%;
+    @include wh-full;
     transition: all 0.4s ease-out;
 }
 
-.nav {
-    $color: #6e6e6e;
-    $active_color: #fff;
+.navbar {
+    .container {
+        @include flex-center;
+        justify-content: space-between;
+    }
 
-    a {
-        font-size: 30px;
-        transition: var(--hover-trans);
-        position: relative;
-        text-decoration: none;
-        background: transparent;
-        border-radius: 7px;
-        margin: 0 auto 0 auto;
-        height: max-content;
-        padding: 5px 15px;
-        z-index: 10;
-        color: $color;
-
-        &::before {
-            content: '';
-            width: 100%;
-            height: 2px;
-            background: $color;
-            position: absolute;
-            left: 0;
-            top: 100%;
-            z-index: 0;
-        }
-
-        &:hover {
-            // transform: translateY(-5px) scale(1.10);
-            color: $active_color;
-
-            &::before {
-                transform: scaleY(1);
+    .left {
+        @include flex-center;
+        .logo {
+            @include wh-custom(150px, 70px);
+            img {
+                @include wh-full;
             }
         }
+        .nav-above {
+            @include flex-center;
+            a {
+                @include wh-max;
+                font-size: 25px;
+                position: relative;
+                text-decoration: none;
+                background: transparent;
 
-        &.active {
-            color: $active_color;
-            font-weight: 600;
+                user-select: none;
+                transition: var(--hover-trans);
+                color: var(--text);
+                z-index: 10;
+                &::before {
+                    content: '';
+                    @include wh-custom(100%, 2px);
+                    background: var(--text);
+                    position: absolute;
+                    left: 0;
+                    top: 100%;
+                    z-index: 0;
 
-            &::before {
-                content: '';
-                width: 100%;
-                height: 4px;
-                background: $active_color;
+                    transform: scaleX(0);
+                    transition: transform var(--hover-trans);
+                }
+
+                &:hover {
+                    // transform: translateY(-5px) scale(1.10);
+                    color: var(--highlight);
+                }
+
+                &.active {
+                    color: var(--highlight);
+                    font-weight: 600;
+
+                    &::before {
+                        content: '';
+                        @include wh-custom(100%, 2px);
+                        background: var(--highlight);
+                        transform: scaleX(1);
+                    }
+                }
             }
         }
     }
-}
 
-.nav-above {
-    $color: #c1c1c1;
-    $active_color: #fff;
+    .right {
+        @include flex-center;
+        .opt {
+            @include wh-max;
+            font-size: 22px;
+            font-family: 'Courier New', Courier, monospace;
+            position: relative;
+            text-decoration: none;
+            background: transparent;
+            cursor: pointer;
+            user-select: none;
 
-    a {
-        font-size: 15px;
-        font-weight: 200;
-        position: relative;
-        text-decoration: none;
-        background: transparent;
-        border-radius: 7px;
-        margin: 0 auto 0 auto;
-        height: max-content;
-        padding: 5px 15px;
-        z-index: 10;
-        color: $color;
+            transition: var(--hover-trans);
+            color: var(--text);
+            z-index: 10;
 
-        transition: all var(--hover-trans);
-
-        &::before {
-            content: '';
-            width: 100%;
-            transform: scaleX(0);
-            transition: transform 0.34s ease-in-out;
-            transform-origin: left;
-            height: 2px;
-            background: $color;
-            position: absolute;
-            left: 0;
-            top: 100%;
-            z-index: 0;
-        }
-
-        &:hover {
-            color: $active_color;
-            font-weight: 500;
-
-            &::before {
-                transform: scaleY(1);
+            &:hover {
+                // transform: translateY(-5px) scale(1.10);
+                color: var(--highlight);
             }
-        }
 
-        &.active {
-            color: $active_color;
-            font-weight: 500;
-
-            &::before {
-                transform: scaleX(1);
-                content: '';
-                width: 100%;
-                height: 4px;
-                background: $active_color;
+            &.active {
+                color: var(--main);
+                font-weight: 600;
             }
         }
     }
 }
 
 // =============== All Key Frames ===============
-@keyframes openNav {
-    0% {
-        transform: scaleY(0);
-    }
-
-    10% {
-        transform: scaleY(1);
-    }
-
-    20% {
-        transform: scaleY(0.89);
-    }
-
-    30% {
-        transform: scaleY(1);
-    }
-
-    40% {
-        transform: scaleY(0.99);
-    }
-
-    50% {
-        transform: scaleY(1);
-    }
-
-    70% {
-        transform: scaleY(1);
-    }
-
-    100% {
-        transform: scaleY(1);
-    }
-}
-
-@keyframes rotate {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes bounce-in {
-    0% {
-        transform: scaleX(0) scaleY(0);
-    }
-
-    50% {
-        transform: scaleX(1) scaleY(0);
-    }
-
-    100% {
-        transform: scaleX(1) scaleY(1);
-    }
-}
-
-.cursorColor {
-    width: 100%;
-    border: none;
-    outline: none;
-    -webkit-appearance: none;
-
-    &::-webkit-color-swatch-wrapper {
-        padding: 0;
-    }
-
-    &::-webkit-color-swatch {
-        border: none;
-    }
-}
 </style>

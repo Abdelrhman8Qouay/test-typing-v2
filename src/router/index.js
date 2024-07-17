@@ -19,12 +19,20 @@ const router = createRouter({
             meta: {
                 title: 'About | testType v2'
             }
+        },
+        {
+            path: '/setting',
+            name: 'setting',
+            component: () => import('../views/SettingView.vue'),
+            meta: {
+                title: 'Settings | testType v2'
+            }
         }
     ]
 })
 
 router.beforeEach((to, from) => {
-    document.title = to.meta?.title ?? "Abdelrhman's Portfolio"
+    document.title = to.meta?.title ?? 'testType v2'
 })
 
 export default router

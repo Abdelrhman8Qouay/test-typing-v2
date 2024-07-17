@@ -532,8 +532,7 @@ function getKeyChild(keyEle, childIndex = 1) {
 
     .keyboard--a,
     .keyboard--detail {
-        background-color: rgb(30 30 30);
-        border: 1px solid rgba(0, 0, 0, 0.07);
+        background-color: var(--sub);
     }
 
     .keyboard {

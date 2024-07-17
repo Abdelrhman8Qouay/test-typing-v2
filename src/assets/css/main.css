@@ -1,3 +1,4 @@
+@import url('./colorModes.css'); /* should import before style anything */
 /* for Tailwind init */
 @tailwind base;
 @tailwind components;
@@ -18,21 +19,17 @@
 
 /* ============== Rest Main ============== */
 :root {
-    --main: aquamarine;
-    --secondary: #fff; /* main text color */
-    --background: #161616;
-}
+    /* Paper Mode is default mode */
+    --bg: #eeeeee; /* hidden */
+    --main: #444444;
+    --caret: #444444; /* less than main */
+    --text: #b2b2b2; /* text color */
+    --sub: #dddddd; /* sub alt color */
+    --highlight: #444444; /* highlight color */
+    --error: #cc241d;
+    --error-extra: #9d0006;
 
-body.darkMode {
-    --main: aquamarine;
-    --secondary: #161616; /* main text color */
-    --background: #fff;
-}
-
-.app {
-    width: 100vw;
-    height: 100vh;
-    overflow: auto;
+    --hover-trans: 0.32s;
 }
 
 /* ------------- Constant ------------- */
@@ -68,15 +65,7 @@ body.darkMode {
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-
-    background: var(--background);
-
     opacity: 1;
     visibility: visible;
     transition: all 0.3s;
-
-    &.animate {
-        opacity: 0;
-        visibility: hidden;
-    }
 }
