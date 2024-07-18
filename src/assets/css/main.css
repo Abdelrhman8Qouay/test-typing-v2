@@ -19,15 +19,15 @@
 
 /* ============== Rest Main ============== */
 :root {
-    /* Paper Mode is default mode */
-    --bg: #eeeeee; /* hidden */
-    --main: #444444;
-    --caret: #444444; /* less than main */
-    --text: #b2b2b2; /* text color */
-    --sub: #dddddd; /* sub alt color */
-    --highlight: #444444; /* highlight color */
-    --error: #cc241d;
-    --error-extra: #9d0006;
+    /* Super user Mode is default mode */
+    --bg: #262a33; /* hidden */
+    --main: #43ffaf;
+    --caret: #43ffaf; /* less than main */
+    --text: #526777; /* text color (sub when copy) */
+    --sub: #1f232c; /* sub alt color */
+    --highlight: #e5f7ef; /* highlight color */
+    --error: #ff5f5f;
+    --error-extra: #d22a2a;
 
     --hover-trans: 0.32s;
 }

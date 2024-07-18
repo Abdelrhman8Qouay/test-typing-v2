@@ -9,8 +9,8 @@
                 <!-- Navbar Content -->
                 <div class="nav-above gap-2 p-2">
                     <RouterLink :class="{ active: $route.path === '/' }" to="/" @click="openTab = false"><KeyboardVariant /></RouterLink>
-                    <RouterLink :class="{ active: $route.path === '/about' }" to="/about" @click="openTab = false"><InformationVariant /></RouterLink>
-                    <RouterLink :class="{ active: $route.path === '/contact' }" to="/contact" @click="openTab = false"><Cogs /></RouterLink>
+                    <a :class="{ active: $route.path === '/about' }" href="https://abdelrhmanqouayportfolio.netlify.app" target="_blank" title="about us"><InformationVariant /></a>
+                    <!-- <RouterLink :class="{ active: $route.path === '/setting' }" to="/setting" @click="openTab = false"><Cogs /></RouterLink> -->
                 </div>
             </div>
             <div class="right">

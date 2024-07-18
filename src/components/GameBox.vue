@@ -44,7 +44,7 @@
 
             <div class="writerBox">
                 <div class="left">
-                    <div class="para_container" ref="paraContainerEle" @click="focusInput(typeInput)"></div>
+                    <div class="para_container" ref="paraContainerEle" @click="focusInput(typeInput)" v-html="paraContainer"></div>
                     <input
                         ref="typeInput"
                         id="userInput"
@@ -78,7 +78,7 @@
 
 <script setup>
 // ============ Import ============
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { addClass, removeClass, hasClass, isSpaceChar, focusInput, scrollToActiveLetter, playAudio, pauseEle } from '@/utils'
 
 import GameSettings from '@/components/Main/GameSettings.vue'
@@ -88,20 +88,24 @@ import Button from '@/components/Used/Button.vue'
 
 import paras from '@/data/context.json'
 // ===================== Stores =====================
+import { storeToRefs } from 'pinia'
 import { usePublicStore } from '@/stores/public'
 import { useSettingStore } from '@/stores/setting'
-const publicStore = usePublicStore()
-const settingStore = useSettingStore()
+const { game_setting, curr_game_setting } = storeToRefs(useSettingStore())
+
+watch(curr_game_setting, async (newVal) => {
+    new nextTick()
+    clickBegin()
+})
 
 // ===================== Variables =====================
-// const gameObj = ref(null)
 const paragraphs = ref(null)
 const showBoard = ref(true)
 const backgroundAudio = ref(null)
 
 // ---------------------------- Game variables
 // paragraph variables
-const const_time = ref(0)
+const const_time = ref(curr_game_setting.value)
 const game_timeout = ref(const_time.value)
 const random_para = ref(0) // random number with length of paragraphs exists
 const current_para = ref(null) // get random content from data
@@ -115,7 +119,8 @@ const correct_chars = ref(0) // correct characters typed
 const words_done = ref(0) // number of words done correctly
 
 const event_key = ref({ code: '' /*Example: KeyE or KeyE the same */, key: '' /*Example: e or E */ })
-const keyboard_char_index = ref(null) // (null) >> to watch when change to a number
+const keyboard_char_index = ref(null) // (null) >> that to watch when change to a number
+const game_stop = ref(null) // contains the interval function to control this
 // variables to check something
 const first_type = ref(false)
 // this finally get result
@@ -124,11 +129,12 @@ const accuracy = ref(0)
 const timeSpent = computed(() => const_time.value - game_timeout.value)
 // ----------------------------
 // DOM elements
-const paraContainerEle = ref(null)
-const para_letters = ref(null)
-const typeInput = ref(null)
+const paraContainer = ref('') // that to fill the html
+const paraContainerEle = ref(null) // to control the element
+const para_letters = ref(null) // all paragraph characters (one by one)
+const typeInput = ref(null) // {input writer}
 // live time
-const gameLiveTime = ref(0)
+const gameLiveTime = ref(0) // liveTime for the game info
 
 // ===================== Functions =====================
 onMounted(() => {
@@ -142,13 +148,11 @@ onMounted(() => {
 
 function clickBegin() {
     // Start the game
-    startGame(paragraphs.value, 5 /*const_time*/)
-
-    // console.log(publicStore.sound_click.err.src)
+    startGame(paragraphs.value, curr_game_setting.value /*const_time*/)
 }
 
 // ===================== Game Functions =====================
-// start the game after create the class
+// ------------------ Start & End game ------------------
 function startGame(paras, const_timeout) {
     // add the options
     const_time.value = const_timeout
@@ -172,9 +176,6 @@ function startGame(paras, const_timeout) {
     // console.log(getImageUrl(current_para.value.audio))
     // playAudio(backgroundAudio.value, true)
 }
-
-// check timeout every second (when start the game) (when typing the first Character)
-
 // ending the game
 function endGame() {
     // put the result of the last game
@@ -191,6 +192,36 @@ function endGame() {
 }
 
 // ------------------ While Typing ------------------
+// this process while typing in the game
+function typing(e) {
+    // if this char is first (add start_char) else (remove start_char)
+    if (para_char_num.value > 0) {
+        removeClass(para_letters.value[para_char_num.value], 'start_char')
+    } else {
+        addClass(para_letters.value[para_char_num.value], 'start_char')
+    }
+
+    // the default variables when click (then use it)
+    let input_char_index = e.target.value.length
+    // for first time typing
+    if (!first_type.value) checkGameTime()
+    first_type.value = true
+
+    // Process this key
+    if (event_key.value.code == 'Space') {
+        // if pressed space
+        spacePressed(e, input_char_index)
+    } else if (event_key.value.code == 'Backspace') {
+        // if delete key pressed (go back if not first char in a word)
+        backPressed(e, input_char_index)
+    } else {
+        // else {that meaning normal key pressed
+        normalPressed(e, input_char_index)
+    }
+
+    wpm.value = wpmCalc()
+    accuracy.value = accCalc()
+}
 function spacePressed(e, input_char_index) {
     if (!input_char_index) {
         // if input Empty >> stop add new char for {input writer}
@@ -212,7 +243,7 @@ function spacePressed(e, input_char_index) {
             addClass(para_letters.value[para_char_num.value], 'letter-active') // add active for new char
             keyboard_char_index.value = para_char_num.value // activeKeyboardKey() // add active for new char on keyboard
             e.target.value = ''
-            playAudio(publicStore.sound_click.click, false)
+            playAudio(usePublicStore().sound_click.click, false)
 
             // if ended the paragraph >> endGame
             if (!current_para_content.value[para_char_num.value] && !isSpaceChar(current_para_content.value[para_char_num.value])) {
@@ -248,7 +279,7 @@ function backPressed(e, input_char_index) {
         }
 
         // play sound
-        playAudio(publicStore.sound_click.click, false)
+        playAudio(usePublicStore().sound_click.click, false)
     } else {
         // go back by classes
         letterBack(para_char_num.value /*this current char_index*/, para_char_num.value - 1 /*this old char_index*/)
@@ -261,7 +292,7 @@ function backPressed(e, input_char_index) {
         }
 
         // play sound
-        playAudio(publicStore.sound_click.click, false)
+        playAudio(usePublicStore().sound_click.click, false)
     }
 }
 function normalPressed(e, input_char_index) {
@@ -271,7 +302,7 @@ function normalPressed(e, input_char_index) {
         content.value[words_done.value][input_char_index - 1].includes(e.target.value[input_char_index - 1])
     ) {
         letterActive(para_char_num.value, 'done', this)
-        playAudio(publicStore.sound_click.click, false)
+        playAudio(usePublicStore().sound_click.click, false)
         para_char_num.value++ // then go next
         total_chars_typed.value++
         correct_chars.value++
@@ -305,47 +336,10 @@ function normalPressed(e, input_char_index) {
     }
 }
 
-// this process while typing in the game
-function typing(e) {
-    // if this char is first (add start_char) else (remove start_char)
-    if (para_char_num.value > 0) {
-        removeClass(para_letters.value[para_char_num.value], 'start_char')
-    } else {
-        addClass(para_letters.value[para_char_num.value], 'start_char')
-    }
-
-    // the default variables when click (then use it)
-    let input_char_index = e.target.value.length
-    // for first time typing
-    if (!first_type.value) checkGameTime()
-    first_type.value = true
-
-    // Process this key
-    if (event_key.value.code == 'Space') {
-        // if pressed space
-        spacePressed(e, input_char_index)
-    } else if (event_key.value.code == 'Backspace') {
-        // if delete key pressed (go back if not first char in a word)
-        backPressed(e, input_char_index)
-    } else {
-        // else {that meaning normal key pressed
-        normalPressed(e, input_char_index)
-    }
-
-    wpm.value = wpmCalc()
-    accuracy.value = accCalc()
-}
-
-// --------------- Activate animations for the paragraph ---------------
-// get the activated key as info(code >> KeyQ, key >> q or Q)
-function keyActivated(e) {
-    event_key.value.code = e.code
-    event_key.value.key = e.key
-}
-
+// --------------- Process the game info ---------------
 // game interval to check the game live time second by second
 function checkGameTime() {
-    var game_stop = setInterval(() => {
+    game_stop.value = setInterval(() => {
         // info changed
         game_timeout.value--
         gameLiveTime.value = game_timeout.value
@@ -353,7 +347,7 @@ function checkGameTime() {
 
         // if the time is 0 >>> endGame
         if (game_timeout.value <= 0) {
-            clearInterval(game_stop)
+            clearInterval(game_stop.value)
             return endGame()
         }
     }, 1000)
@@ -369,6 +363,13 @@ function wpmCalc() {
 function accCalc() {
     let accuracy = (correct_chars.value / total_chars_typed.value) * 100 // (correctCharactersTyped / totalCharactersTyped) * 100;
     return Math.floor(accuracy) || 0
+}
+
+// --------------- Activate animations for the paragraph ---------------
+// get the activated key as info(code >> KeyQ, key >> q or Q)
+function keyActivated(e) {
+    event_key.value.code = e.code
+    event_key.value.key = e.key
 }
 
 // activate the letter in the paragraph
@@ -424,20 +425,20 @@ function letterBack(currChar_index, toChar_index) {
 
 // (play the error audio sound) (if not audio only >> add the class) for error click press
 function clickError(el, className, audOnly = false) {
-    console.log(publicStore.sound_click.err.src)
+    console.log(usePublicStore().sound_click.err.src)
     if (!audOnly && el && className) addClass(el, className)
-    let pressKeyAud = new Audio(publicStore.sound_click.err)
+    let pressKeyAud = new Audio(usePublicStore().sound_click.err)
     playAudio(pressKeyAud, false)
 }
 
-// ==================== Return Info
+// --------------- Info game ---------------
 function defaultGameInfo() {
-    paraContainerEle.innerHTML = ''
+    paraContainerEle.value.scrollLeft = 0
+    paraContainer.value = ''
+    if (game_stop.value) clearInterval(game_stop.value)
     gameLiveTime.value = const_time.value // live Time
     typeInput.value.value = ''
-    if (hasClass(typeInput.value, 'error')) {
-        removeClass(typeInput.value, 'error')
-    }
+    if (hasClass(typeInput.value, 'error')) removeClass(typeInput.value, 'error')
 
     // to default
     para_char_num.value = 0 // the total character numbers of paragraph as [index] {access on all chars in para}
@@ -446,27 +447,30 @@ function defaultGameInfo() {
     words_done.value = 0 // number of words done correctly
     event_key.value = { code: '', key: '' }
     first_type.value = false
-    keyboard_char_index.value = 0
+    keyboard_char_index.value = 5
 
     wpm.value = 0
     accuracy.value = 0
 }
 
-function addParagraph() {
+async function addParagraph() {
     // empty paragraph interface then
-    paraContainerEle.value.innerHTML = ''
+    paraContainer.value = ''
 
     // the first char added
-    paraContainerEle.value.innerHTML += `<span class="letter letter-active start_char" data-char="${current_para_content.value[0]}">${current_para_content.value[0]}</span>`
+    paraContainer.value += `<span class="letter letter-active start_char" data-char="${current_para_content.value[0]}">${current_para_content.value[0]}</span>`
     keyboard_char_index.value = 0 //KeyboardI.activeKeyboardKey(0, gameObj)
 
     // iterate for all chars
     for (let i = 1; i < current_para_content.value.length; i++) {
-        paraContainerEle.value.innerHTML += `<span class="letter" data-char="${current_para_content.value[i]}">${current_para_content.value[i]}</span>`
+        paraContainer.value += `<span class="letter" data-char="${current_para_content.value[i]}">${current_para_content.value[i]}</span>`
     }
 
+    await nextTick()
+
     // get the letters as variables
-    para_letters.value = document.querySelectorAll('.game_box .writerBox .para_container .letter')
+    para_letters.value = paraContainerEle.value.querySelectorAll('.game_box .writerBox .para_container .letter')
+    console.log(para_letters.value)
 }
 </script>
 
@@ -543,7 +547,7 @@ function addParagraph() {
         width: 70%;
         .para_container {
             white-space: break-spaces;
-            overflow: auto;
+            overflow: hidden;
             height: max-content;
 
             display: flex;

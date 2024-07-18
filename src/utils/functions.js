@@ -10,10 +10,7 @@ export function playAudio(aud, audioLoop) {
 
     aud.volume = 0.4
 
-    aud.play().catch(() => {
-        aud.pause()
-        aud.play()
-    })
+    aud.play()
 }
 export function onAudioEnded() {
     this.currentTime = 0

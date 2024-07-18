@@ -2,38 +2,36 @@
     <div class="gameSettings p-2 rounded-lg h-max w-max">
         <!-- paragraph types -->
         <div class="col">
-            <div v-for="(val, i) in Object.keys(setting_of_paras)" :key="i" class="tag option" @click="para_type = val">{{ val }}</div>
-            <div class="tag">custom</div>
+            <div
+                v-for="(val, i) in Object.keys(settingStore.setting_of_paras)"
+                :key="i"
+                class="tag option"
+                :class="{ active: game_setting.type == val }"
+                @click="settingStore.liveGameSetting(val, 'type')"
+            >
+                {{ val }}
+            </div>
         </div>
         <div class="break-v"></div>
         <!-- game times -->
         <div class="col" v-auto-animate>
-            <div v-for="(val, i) in setting_of_paras[para_type]" :key="i" class="tag option">{{ val }}</div>
-            <div class="tag">custom</div>
+            <div v-for="(val, i) in game_setting.setting" @click="settingStore.liveGameSetting(val, 'setting')" :key="i" :class="{ active: curr_game_setting == val }" class="tag option">
+                {{ val }}
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, toRefs } from 'vue'
+import { ref } from 'vue'
 
 // ===================== Stores =====================
+import { storeToRefs } from 'pinia'
 import { usePublicStore } from '@/stores/public'
 import { useSettingStore } from '@/stores/setting'
-const publicStore = usePublicStore()
-const settingStore = useSettingStore()
-
-// show all option for each type of the paragraphs
-const setting_of_paras = {
-    time: [15, 30, 60, 120],
-    words: [10, 25, 50, 100],
-    quote: ['short', 'medium', 'long']
-}
-
-// paragraph type that can decide what is the option got
-const para_type = ref('time')
-
-onMounted(() => {})
+const publicStore = usePublicStore(),
+    settingStore = useSettingStore()
+const { game_setting, curr_game_setting } = storeToRefs(settingStore)
 </script>
 
 <style lang="scss" scoped>

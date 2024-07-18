@@ -466,6 +466,8 @@ function activeKeyboardKey(char_index) {
     // remove the active class from the keys (on keyboard animation)
     removeActiveKeys()
 
+    if (char_index == 'nothing') return
+
     // get the current key element
     var currKeyElement = document.querySelector(`.keyboard .keyboard-row .keyboard-key.key[data-char="${getKeyCode(current_para_content.value[char_index])}"]`)
 
@@ -497,13 +499,6 @@ function removeActiveKeys() {
 // get the key code {1 >> Digit1, ! >> Digit1}
 function getKeyCode(char) {
     return charToKeyCodeMap[char] || null
-}
-
-// get the child that is available or null in {key element}
-function getKeyChild(keyEle, childIndex = 1) {
-    if (!keyEle) return null
-    let availableChild = keyEle.children[childIndex] || keyEle.children[1] || keyEle.children[0] || null
-    return availableChild
 }
 </script>
 
