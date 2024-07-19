@@ -1,8 +1,12 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { removeClass, addClass } from '@/utils'
+import { removeClass, addClass, loadFont } from '@/utils'
+
+import { useGameStore } from './game'
 
 export const useSettingStore = defineStore('setting', () => {
+    const gameStore = useGameStore()
+
     // paragraph type that can decide what is the option got
     const para_type = ref('time')
 
@@ -39,7 +43,7 @@ export const useSettingStore = defineStore('setting', () => {
         addClass(body, color_modes[modeName])
     }
 
-    // For game settings ===========================
+    // For game settings Row ===========================
     // show all option for each type of the paragraphs
     const setting_of_paras = {
         time: [15, 30, 60, 120, 'custom'],
@@ -67,140 +71,256 @@ export const useSettingStore = defineStore('setting', () => {
         }
     }
 
-    // For game settings ===========================
+    // For game settings Page ===========================
+    /*
+        // set is: array set of available choices to use them
+        // func is: the function of this setting to use it
+        // def is: default value used in first time
+        // type is: >>>
+            input >> custom input (to fill {as} value) by custom value
+            button >> one button make a function (more accurate for a function)
+            many >> many buttons also that can make a function
+    */
     const compo_game_setting = ref({
         behavior: {
-            'show keyboard': {
-                set: ['off', 'on'],
-                as: 'on',
-                comment: 'display the keyboard animation',
-                icon: 'keyboardOffOutline'
-            },
             'test difficulty': {
                 set: ['normal', 'expert', 'master'],
+                def: 'normal',
                 as: 'normal',
+                type: 'many',
+                func: (inp) => (gameStore.testDifficulty = inp),
                 comment:
                     'Normal is the classic type test experience. Expert fails the test if you submit (press space) an incorrect word. Master fails if you press a single incorrect key (meaning you have to achieve 100% accuracy).',
-                icon: 'starShooting'
+                icon: 'mdi:star-shooting'
             },
             'quick restart': {
                 set: ['off', 'tab', 'enter', 'esc'],
+                def: 'esc',
                 as: 'esc',
+                type: 'many',
+                func: (inp) => (gameStore.quickRestart = inp),
                 comment: `<div class="text"> Press <key>tab</key> ,
 <key>esc</key> or <key>enter</key> to quickly restart the test, or to quickly jump to the test page. These
 options disable tab navigation on most parts of the website. Using the "esc" option will move opening the commandline to the <key>tab</key> key.</div>`,
-                icon: 'restart'
+                icon: 'mdi:restart'
             }
         },
         'when input': {
             'freedom mode': {
                 set: ['off', 'on'],
+                def: 'off',
                 as: 'off',
+                type: 'many',
+                func: (inp) => (gameStore.freedomMode = inp),
                 comment: `Allows you to delete any word, even if it was typed correctly.`,
-                icon: 'typewriter'
+                icon: 'mdi:typewriter'
             },
             'stop on error': {
                 set: ['off', 'word', 'letter'],
+                def: 'off',
                 as: 'off',
+                type: 'many',
+                func: (inp) => (gameStore.stopOnError = inp),
                 comment: `Letter mode will stop input when pressing any incorrect letters. Word mode will not allow you to continue to the next word until you correct all mistakes.`,
-                icon: 'handBackRight'
+                icon: 'mdi:hand-back-right'
             },
             'confidence mode': {
                 set: ['off', 'on', 'max'],
+                def: 'off',
                 as: 'off',
+                type: 'many',
+                func: (inp) => (gameStore.confidenceMode = inp),
                 comment: `When enabled, you will not be able to go back to previous words to fix mistakes. When turned up to the max, you won't be able to backspace at all.`,
-                icon: 'backspace'
+                icon: 'mdi:backspace'
             },
             'lazy mode': {
                 set: ['off', 'on'],
+                def: 'off',
                 as: 'off',
+                type: 'many',
+                func: (inp) => (gameStore.lazyMode = inp),
                 comment: `Replaces accents / diacritics / special characters with their normal letter equivalents.`,
-                icon: 'cradleOutline'
+                icon: 'mdi:cradle-outline'
             }
         },
         sound: {
             'sound volume': {
                 set: ['quiet', 'medium', 'loud'],
+                def: 'medium',
                 as: 'medium',
+                type: 'many',
+                func: (inp) => (gameStore.soundVolume = inp),
                 comment: `Change the volume of the sound effects.`,
-                icon: 'volumeMedium'
+                icon: 'mdi:volume-medium'
             },
             'play sound on click': {
                 set: ['off', 'click', 'pop', 'typewriter', 'hit master', 'square', 'nk creams', 'rubber keys'],
+                def: 'nk creams',
                 as: 'nk creams',
+                type: 'many',
+                func: (inp) => (gameStore.soundOnClick = inp),
                 comment: `Plays a short sound when you press a key.`,
-                icon: 'volumeSource'
+                icon: 'mdi:volume-source'
             },
             'play sound on error': {
                 set: ['off', 'damage', 'square', 'triangle'],
+                def: 'damage',
                 as: 'damage',
+                type: 'many',
+                func: (inp) => (gameStore.soundOnError = inp),
                 comment: `Plays a short sound if you press an incorrect key or press space too early.`,
-                icon: 'volumeMute'
+                icon: 'mdi:volume-mute'
             }
         },
         appearance: {
+            'show keyboard': {
+                set: ['off', 'on'],
+                def: 'on',
+                type: 'many',
+                func: (inp) => (gameStore.show_keyboard = inp),
+                comment: 'display the keyboard animation',
+                icon: 'ph:keyboard-thin'
+            },
             'typing speed unit': {
                 set: ['wpm', 'cpm', 'wps', 'cps'],
-                as: 'wpm',
+                def: 'wpm',
+                type: 'many',
+                func: (inp) => (gameStore.per.type = inp),
                 comment: `Display typing speed in the specified unit.`,
-                icon: 'carSpeedLimiter'
+                icon: 'mdi:car-speed-limiter'
             },
             'font size': {
-                set: function getFontSize() {},
-                as: 2,
+                set: [],
+                def: 2,
+                type: 'input',
+                'input type': 'number',
+                attrs: {
+                    min: 1,
+                    max: 10
+                },
+                func: (inp) => (gameStore.fontSize = inp),
                 comment: `Change the font size of the test words.`,
-                icon: 'formatSize'
+                icon: 'mdi:format-size'
+            },
+            'font family': {
+                set: [
+                    'Roboto',
+                    'Open Sans',
+                    'Lato',
+                    'Montserrat',
+                    'Oswald',
+                    'Raleway',
+                    'Merriweather',
+                    'Noto Sans',
+                    'Ubuntu',
+                    'Playfair Display',
+                    'Poppins',
+                    'Source Sans Pro',
+                    'Indie Flower',
+                    'Dancing Script',
+                    'Rubik',
+                    'Pacifico',
+                    'Cinzel',
+                    'Bebas Neue',
+                    'Quicksand',
+                    'Josefin Sans',
+                    'Cabin',
+                    'Fira Sans',
+                    'Nunito',
+                    'Comfortaa',
+                    'Baloo 2',
+                    'Abril Fatface',
+                    'Cairo',
+                    'PT Sans',
+                    'Lobster',
+                    'Muli',
+                    'Mukta',
+                    'Heebo',
+                    'Karla',
+                    'Yanone Kaffeesatz',
+                    'Crimson Text',
+                    'Varela Round'
+                ],
+                def: 'Lato',
+                func: (font) => {
+                    gameStore.fontName = font
+                    loadFont(font)
+                },
+                type: 'many',
+                comment: ``,
+                icon: 'ic:baseline-font-download'
             }
-            // 'font family': {
-            //     set: ['off', 'damage', 'square', 'triangle'],
-            //     as: 'damage',
-            //     comment: `Plays a short sound if you press an incorrect key or press space too early.`,
-            //     icon: 'fontAwesome'
-            // },
         },
         theme: {
             'flip test colors': {
                 set: ['off', 'on'],
+                def: 'off',
                 as: 'off',
+                type: 'many',
+                func: (inp) => (gameStore.flipTestColors = inp),
                 comment: 'By default, typed text is brighter than the future text. When enabled, the colors will be flipped and the future text will be brighter than the already typed text.',
-                icon: 'compare'
+                icon: 'mdi:compare'
             },
             'colorful mode': {
                 set: ['off', 'on'],
+                def: 'off',
                 as: 'off',
+                type: 'many',
+                func: (inp) => (gameStore.colorfulMode = inp),
                 comment: 'When enabled, the test words will use the main color, instead of the text color, making the website more colorful.',
-                icon: 'formatColorFill'
+                icon: 'mdi:format-color-fill'
             },
             theme: {
                 set: Object.keys(color_modes),
+                def: curr_color_mode.value,
                 as: curr_color_mode.value,
+                type: 'many',
+                func: (mode) => {
+                    gameStore.currTheme = mode
+                    toggleMode(mode)
+                },
                 comment: '',
-                icon: 'palette'
+                icon: 'mdi:palette'
             }
         },
         'hide elements': {
             'out of focus warning': {
                 set: ['hide', 'show'],
+                def: 'show',
                 as: 'show',
+                type: 'many',
+                func: (inp) => (gameStore.outOfFocusWarning = inp),
                 comment: `Shows an out of focus reminder after 1 second of being 'out of focus' (not being able to type).`,
-                icon: 'alert'
+                icon: 'tabler:alert-small'
             },
             'caps lock warning': {
                 set: ['hide', 'show'],
+                def: 'show',
                 as: 'show',
+                type: 'many',
+                func: (inp) => (gameStore.capsLockWarning = inp),
                 comment: 'Displays a warning when caps lock is on.',
-                icon: 'alert'
+                icon: 'mdi:alert'
             }
         },
         'danger zone': {
             'reset settings': {
+                def: null,
                 set: null,
-                as: function resetGameSetting() {},
+                as: null,
+                type: 'button',
+                func: () => {
+                    Object.keys(compo_game_setting.value).forEach((row) => {
+                        Object.keys(compo_game_setting.value[row]).forEach((set) => {
+                            compo_game_setting.value[row][set].as = compo_game_setting.value[row][set].def
+                        })
+                    })
+                },
                 comment: `Resets settings to the default (but doesn't touch your tags). <br> <span class="text-[var(--error)]">You can't undo this action!</span>`,
-                icon: 'restart'
+                icon: 'mdi:restart'
             }
         }
     })
 
-    return { para_type, curr_color_mode, color_modes, toggleMode, setting_of_paras, game_setting, liveGameSetting, curr_game_setting }
+    return { para_type, curr_color_mode, color_modes, toggleMode, setting_of_paras, game_setting, liveGameSetting, curr_game_setting, compo_game_setting }
 })

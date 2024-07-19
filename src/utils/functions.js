@@ -87,26 +87,6 @@ export async function fetchData(filePath) {
 export function focusInput(eleInput) {
     eleInput.focus()
 }
-// scroll the container to active letter
-export function scrollToActiveLetter(paraContainerEle) {
-    const activeLetter = paraContainerEle.querySelector('.letter-active')
-    console.log('scroll here')
-
-    if (activeLetter) {
-        // Calculate the position to scroll to
-        const containerRect = paraContainerEle.getBoundingClientRect()
-        const activeLetterRect = activeLetter.getBoundingClientRect()
-
-        // Calculate the horizontal scroll position to center the active letter
-        const scrollLeft = activeLetterRect.left - containerRect.left + paraContainerEle.scrollLeft - containerRect.width / 2 + activeLetterRect.width / 2
-
-        // Smoothly scroll the container to the calculated position
-        paraContainerEle.scrollTo({
-            left: scrollLeft,
-            behavior: 'smooth'
-        })
-    }
-}
 
 export function makeNoScroll(ifTrue) {
     let body = document.body
@@ -125,10 +105,4 @@ export function getImageUrl(urlName) {
 
 export function sleep(milliseconds) {
     return new Promise((resolve) => setTimeout(resolve, milliseconds))
-    /*Use like so*/
-    // async function timeSensativeAction() { // must be async func
-    //     // do something here
-    //      await sleep(5000) // wait 5 seconds
-    //     // continue on...
-    //   }
 }

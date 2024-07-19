@@ -8,19 +8,15 @@
                 </div>
                 <!-- Navbar Content -->
                 <div class="nav-above gap-2 p-2">
-                    <RouterLink :class="{ active: $route.path === '/' }" to="/" @click="openTab = false"><KeyboardVariant /></RouterLink>
-                    <a :class="{ active: $route.path === '/about' }" href="https://abdelrhmanqouayportfolio.netlify.app" target="_blank" title="about us"><InformationVariant /></a>
-                    <!-- <RouterLink :class="{ active: $route.path === '/setting' }" to="/setting" @click="openTab = false"><Cogs /></RouterLink> -->
+                    <RouterLink :class="{ active: $route.path === '/' }" to="/" @click="openTab = false"><Icon icon="mdi:keyboard-variant" /></RouterLink>
+                    <a :class="{ active: $route.path === '/about' }" href="https://abdelrhmanqouayportfolio.netlify.app" target="_blank" title="about us"><Icon icon="mdi:information-variant" /></a>
+                    <RouterLink :class="{ active: $route.path === '/setting' }" to="/setting" @click="openTab = false"><Icon icon="mdi:cogs" /></RouterLink>
                 </div>
             </div>
             <div class="right">
                 <div class="relative" tabindex="0">
-                    <span
-                        class="flex justify-center items-center opt font-sans"
-                        @click.self="open_color_mode_menu = !open_color_mode_menu"
-                        :class="open_color_mode_menu ? '!text-[var(--highlight)]' : ''"
-                    >
-                        <ThemeLightDark class="mx-1 inline-block" />
+                    <span class="flex justify-center items-center opt" @click.self="open_color_mode_menu = !open_color_mode_menu" :class="open_color_mode_menu ? '!text-[var(--highlight)]' : ''">
+                        <Icon icon="mdi:theme-light-dark" class="mx-1 inline-block" />
                         {{ settingStore.curr_color_mode }}</span
                     >
                     <ul
@@ -50,18 +46,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { Icon } from '@iconify/vue'
 
 // ===================== Stores =====================
 import { usePublicStore } from '@/stores/public'
 import { useSettingStore } from '@/stores/setting'
 const publicStore = usePublicStore()
 const settingStore = useSettingStore()
-
-// ========================== get icons ==========================
-import KeyboardVariant from 'vue-material-design-icons/KeyboardVariant.vue'
-import InformationVariant from 'vue-material-design-icons/InformationVariant.vue'
-import Cogs from 'vue-material-design-icons/Cogs.vue'
-import ThemeLightDark from 'vue-material-design-icons/ThemeLightDark.vue'
 
 // ========================== Process ==========================
 let open_color_mode_menu = ref(false)
@@ -141,7 +132,6 @@ let open_color_mode_menu = ref(false)
         .opt {
             @include wh-max;
             font-size: 22px;
-            font-family: 'Courier New', Courier, monospace;
             position: relative;
             text-decoration: none;
             background: transparent;

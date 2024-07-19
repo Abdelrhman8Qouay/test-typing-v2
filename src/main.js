@@ -22,7 +22,7 @@ import router from './router'
 // ============== For Create ==============
 const app = createApp(App)
 app.use(createPinia())
-app.use(AOS.init())
+// app.use(AOS.init())
 app.use(router)
 app.use(autoAnimatePlugin)
 

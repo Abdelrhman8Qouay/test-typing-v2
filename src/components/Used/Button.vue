@@ -4,7 +4,7 @@
         class="btn hover:shadow-md hover:shadow-black px-4 py-1 max-md:!text-xs max-md:!font-extralight border-none transition flex justify-center items-center uppercase"
         :class="txtColor ? txtColor : 'main_clear-text'"
     >
-        <component v-if="ico" class="mx-1 inline-block" :fillColor="icoColor ? icoColor : '#fff'" :size="icoSize" :is="Icons"> </component>{{ txt }}<slot></slot>
+        <Icon v-if="ico" :icon="ico" :color="icoColor ? icoColor : '#fff'" :height="icoSize ? icoSize : 24" /> {{ txt }}<slot></slot>
     </button>
     <a
         v-else
@@ -13,27 +13,14 @@
         :class="txtColor ? txtColor : 'main_clear-text'"
         :href="url"
     >
-        <component v-if="ico" class="mx-1 inline-block" :fillColor="icoColor ? icoColor : '#fff'" :size="icoSize ? icoSize : 24" :is="Icons"> </component> {{ txt }}<slot></slot>
+        <Icon v-if="ico" :icon="ico" :color="icoColor ? icoColor : '#fff'" :height="icoSize ? icoSize : 24" /> {{ txt }}<slot></slot>
     </a>
 </template>
 
 <script setup>
-import { ref, defineProps, toRefs, shallowRef } from 'vue'
+import { ref, toRefs, shallowRef } from 'vue'
 // get icons
-import Account from 'vue-material-design-icons/Account.vue'
-import Email from 'vue-material-design-icons/Email.vue'
-import Message from 'vue-material-design-icons/Message.vue'
-import Phone from 'vue-material-design-icons/Phone.vue'
-import Disc from 'vue-material-design-icons/Disc.vue'
-import Map from 'vue-material-design-icons/Map.vue'
-import Eye from 'vue-material-design-icons/Eye.vue'
-import Code from 'vue-material-design-icons/Xml.vue'
-import KeyboardVariant from 'vue-material-design-icons/KeyboardVariant.vue'
-
-import Facebook from 'vue-material-design-icons/Facebook.vue'
-import Twitter from 'vue-material-design-icons/Twitter.vue'
-import Github from 'vue-material-design-icons/Github.vue'
-import Linkedin from 'vue-material-design-icons/Linkedin.vue'
+import { Icon } from '@iconify/vue'
 
 // get props values
 const props = defineProps({
@@ -46,22 +33,6 @@ const props = defineProps({
     icoSize: Number // accept only numbers for (icon px)
 })
 const { isButton, url, txt, ico, icoColor, txtColor, icoSize } = toRefs(props)
-
-// handle the icons to work
-const Icons = shallowRef(null)
-if (ico.value === 'account') Icons.value = Account
-else if (ico.value === 'email') Icons.value = Email
-else if (ico.value === 'phone') Icons.value = Phone
-else if (ico.value === 'message') Icons.value = Message
-else if (ico.value === 'disc') Icons.value = Disc
-else if (ico.value === 'map') Icons.value = Map
-else if (ico.value === 'eye') Icons.value = Eye
-else if (ico.value === 'code') Icons.value = Code
-else if (ico.value === 'keyboard-variant') Icons.value = KeyboardVariant
-else if (ico.value === 'facebook') Icons.value = Facebook
-else if (ico.value === 'twitter') Icons.value = Twitter
-else if (ico.value === 'github') Icons.value = Github
-else if (ico.value === 'linkedin') Icons.value = Linkedin
 </script>
 
 <style lang="scss" scoped>

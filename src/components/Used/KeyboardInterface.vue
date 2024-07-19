@@ -311,7 +311,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, toRefs, watch } from 'vue'
+import { ref, toRefs, watch } from 'vue'
 import { addClass, removeClass, capitalizeFirstChar } from '@/utils'
 
 const props = defineProps({

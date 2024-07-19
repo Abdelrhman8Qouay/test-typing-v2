@@ -27,8 +27,7 @@ import { ref } from 'vue'
 
 // ===================== Stores =====================
 import { storeToRefs } from 'pinia'
-import { usePublicStore } from '@/stores/public'
-import { useSettingStore } from '@/stores/setting'
+import { usePublicStore, useSettingStore } from '@/stores'
 const publicStore = usePublicStore(),
     settingStore = useSettingStore()
 const { game_setting, curr_game_setting } = storeToRefs(settingStore)

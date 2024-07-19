@@ -1,7 +1,7 @@
 <template>
     <div class="relative" tabindex="0">
         <span tabindex="0" :class="btnColors ? btnColors : 'text-[var(--text)]'" @blur="open_down_menu = false" @click="open_down_menu = !open_down_menu">
-            <component v-if="iconName" class="mx-1 inline-block" :fillColor="iconColor ? iconColor : '#fff'" :size="iconSize" :is="Icons"></component>
+            <Icon v-if="iconName" name="iconName" class="mx-1 inline-block" :color="iconColor ? iconColor : '#fff'" :height="iconSize" :is="Icons" />
             {{ txt }}</span
         >
         <ul
@@ -34,10 +34,8 @@
 </template>
 
 <script setup>
-import { ref, defineProps, toRefs, shallowRef } from 'vue'
-
-import Github from 'vue-material-design-icons/Github.vue'
-import ThemeLightDark from 'vue-material-design-icons/ThemeLightDark.vue'
+import { ref, toRefs, shallowRef } from 'vue'
+import { Icon } from '@iconify/vue'
 
 const props = defineProps({
     txt: String,
@@ -60,13 +58,7 @@ const props = defineProps({
 let { txt, flowCurve, list, btnColors, menuColors, liColors, iconName, iconSize, iconColor, whereIcon } = toRefs(props)
 
 // dropdown take the value to the parent
-
 let open_down_menu = ref(false)
-
-// handle the icons to work
-const Icons = shallowRef(null)
-if (iconName.value === 'themeLightDark') Icons.value = ThemeLightDark
-else if (iconName.value === 'github') Icons.value = Github
 </script>
 
 <style lang="scss">

@@ -5,8 +5,8 @@
         <div class="board_box w-full h-full flex flex-col justify-center align-center" :class="!showBoard ? 'hide' : ''">
             <div class="containInfo">
                 <div class="box">
-                    <h2>wpm</h2>
-                    <span id="wpm" ref="wpmEle">{{ wpm }}</span>
+                    <h2>{{ per.type }}</h2>
+                    <span id="wpm" ref="wpmEle">{{ per.value }}</span>
                 </div>
                 <div class="box">
                     <h2>acc</h2>
@@ -59,8 +59,8 @@
                 </div>
                 <div class="right">
                     <div class="box">
-                        <h2>wpm</h2>
-                        <span id="wpmLive" ref="wpmLiveTimeEle">{{ wpm }}</span>
+                        <h2>{{ per.type }}</h2>
+                        <span id="wpmLive" ref="wpmLiveTimeEle">{{ per.value }}</span>
                     </div>
                     <div class="box">
                         <h2>acc</h2>
@@ -70,7 +70,7 @@
                 </div>
             </div>
 
-            <KeyboardInterface :char_index="keyboard_char_index" :current_para_content="current_para_content" />
+            <KeyboardInterface v-if="strToBool(show_keyboard)" :char_index="keyboard_char_index" :current_para_content="current_para_content" />
         </div>
     </div>
 </template>
@@ -80,6 +80,8 @@
 // ============ Import ============
 import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { addClass, removeClass, hasClass, isSpaceChar, focusInput, scrollToActiveLetter, playAudio, pauseEle } from '@/utils'
+// import game functions
+import { calculateTypingMetrics, strToBool } from '@/utils'
 
 import GameSettings from '@/components/Main/GameSettings.vue'
 import LeavesAnimate from '@/components/Used/LeavesAnimate.vue'
@@ -89,9 +91,10 @@ import Button from '@/components/Used/Button.vue'
 import paras from '@/data/context.json'
 // ===================== Stores =====================
 import { storeToRefs } from 'pinia'
-import { usePublicStore } from '@/stores/public'
-import { useSettingStore } from '@/stores/setting'
+import { usePublicStore, useGameStore, useSettingStore } from '@/stores'
 const { game_setting, curr_game_setting } = storeToRefs(useSettingStore())
+// -------- addition game variables --------
+const { show_keyboard, per } = storeToRefs(useGameStore())
 
 watch(curr_game_setting, async (newVal) => {
     new nextTick()
@@ -124,7 +127,6 @@ const game_stop = ref(null) // contains the interval function to control this
 // variables to check something
 const first_type = ref(false)
 // this finally get result
-const wpm = ref(0)
 const accuracy = ref(0)
 const timeSpent = computed(() => const_time.value - game_timeout.value)
 // ----------------------------
@@ -179,7 +181,7 @@ function startGame(paras, const_timeout) {
 // ending the game
 function endGame() {
     // put the result of the last game
-    wpm.value = wpmCalc()
+    per.value.value = calculateTypingMetrics(para_char_num.value, timeSpent.value)[per.value.type]
     accuracy.value = accCalc()
 
     // pause background audio
@@ -219,7 +221,7 @@ function typing(e) {
         normalPressed(e, input_char_index)
     }
 
-    wpm.value = wpmCalc()
+    per.value.value = calculateTypingMetrics(para_char_num.value, timeSpent.value)[per.value.type]
     accuracy.value = accCalc()
 }
 function spacePressed(e, input_char_index) {
@@ -343,7 +345,7 @@ function checkGameTime() {
         // info changed
         game_timeout.value--
         gameLiveTime.value = game_timeout.value
-        wpm.value = wpmCalc()
+        per.value.value = calculateTypingMetrics(para_char_num.value, timeSpent.value)[per.value.type]
 
         // if the time is 0 >>> endGame
         if (game_timeout.value <= 0) {
@@ -353,12 +355,6 @@ function checkGameTime() {
     }, 1000)
 }
 
-// return words per minute (wpm)
-function wpmCalc() {
-    let words = para_char_num.value / 5, // use the standard definition that one word is equal to 5 characters
-        time_to_minute = timeSpent.value / 60 // convert seconds to minutes // seconds(timeout) / 60
-    return Math.round(words / time_to_minute) || 0 // words per minute // Math.round( wordsWrote / minutesTimeout )
-}
 // accuracy calculation (return the percentage of the user typing accuracy)
 function accCalc() {
     let accuracy = (correct_chars.value / total_chars_typed.value) * 100 // (correctCharactersTyped / totalCharactersTyped) * 100;
@@ -449,7 +445,7 @@ function defaultGameInfo() {
     first_type.value = false
     keyboard_char_index.value = 5
 
-    wpm.value = 0
+    per.value.value = 0
     accuracy.value = 0
 }
 
