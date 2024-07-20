@@ -70,7 +70,7 @@
                 </div>
             </div>
 
-            <KeyboardInterface v-if="strToBool(show_keyboard)" :char_index="keyboard_char_index" :current_para_content="current_para_content" />
+            <KeyboardInterface v-if="strToBool(compo_game_setting.appearance['show keyboard'].as)" :char_index="keyboard_char_index" :current_para_content="current_para_content" />
         </div>
     </div>
 </template>
@@ -92,9 +92,8 @@ import paras from '@/data/context.json'
 // ===================== Stores =====================
 import { storeToRefs } from 'pinia'
 import { usePublicStore, useGameStore, useSettingStore } from '@/stores'
-const { game_setting, curr_game_setting } = storeToRefs(useSettingStore())
-// -------- addition game variables --------
-const { show_keyboard, per } = storeToRefs(useGameStore())
+const { game_setting, curr_game_setting, compo_game_setting } = storeToRefs(useSettingStore())
+const { per } = storeToRefs(useGameStore())
 
 watch(curr_game_setting, async (newVal) => {
     new nextTick()
@@ -466,7 +465,6 @@ async function addParagraph() {
 
     // get the letters as variables
     para_letters.value = paraContainerEle.value.querySelectorAll('.game_box .writerBox .para_container .letter')
-    console.log(para_letters.value)
 }
 </script>
 

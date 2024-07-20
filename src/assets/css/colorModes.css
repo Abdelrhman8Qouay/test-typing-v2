@@ -250,3 +250,81 @@
     --error: #d70000;
     --error-extra: #b00000;
 }
+
+.shadowMode {
+    --bg: #000; /* hidden */
+    --main: #eee;
+    --caret: #eee; /* less than main */
+    --text: #444; /* text color (sub when copy) */
+    --sub: #171717; /* sub alt color */
+    --highlight: #eee; /* highlight color */
+    --error: #fff;
+    --error-extra: #d8d8d8;
+}
+
+.viridescentMode {
+    --bg: #2c3333; /* hidden */
+    --main: #95d5b2;
+    --caret: #f0d3c9; /* less than main */
+    --text: #84a98c; /* text color (sub when copy) */
+    --sub: #232828; /* sub alt color */
+    --highlight: #e9f5db; /* highlight color */
+    --error: #ff4646;
+    --error-extra: #ab2f2f;
+}
+
+/* Additional Color Modes (from ai generation) */
+.blueOceanMode {
+    --bg: #1e3d58;
+    --main: #0278ae;
+    --caret: #0278ae;
+    --text: #e0e1dd;
+    --sub: #a9b2c3;
+    --highlight: #a2d5f2;
+    --error: #ff6b6b;
+    --error-extra: #c23b22;
+}
+
+.greenForestMode {
+    --bg: #2e8b57;
+    --main: #6b8e23;
+    --caret: #6b8e23;
+    --text: #556b2f;
+    --sub: #8fbc8f;
+    --highlight: #b0c4de;
+    --error: #dc143c;
+    --error-extra: #8b0000;
+}
+
+.sunnyYellowMode {
+    --bg: #fffacd;
+    --main: #ffd700;
+    --caret: #ffd700;
+    --text: #b8860b;
+    --sub: #ffa07a;
+    --highlight: #ffdead;
+    --error: #f08080;
+    --error-extra: #ff6347;
+}
+
+.purpleNightMode {
+    --bg: #4b0082;
+    --main: #9400d3;
+    --caret: #9400d3;
+    --text: #dda0dd;
+    --sub: #8a2be2;
+    --highlight: #ee82ee;
+    --error: #ff1493;
+    --error-extra: #c71585;
+}
+
+.orangeSunsetMode {
+    --bg: #ff4500;
+    --main: #ff8c00;
+    --caret: #ff8c00;
+    --text: #ff6347;
+    --sub: #ffdab9;
+    --highlight: #ff7f50;
+    --error: #fa8072;
+    --error-extra: #e9967a;
+}

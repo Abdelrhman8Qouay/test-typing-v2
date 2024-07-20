@@ -1,7 +1,7 @@
 import { ref, computed, watch } from 'vue'
 import { defineStore } from 'pinia'
 
-// import { getImageUrl, hasClass } from '../utils'
+import { getImageUrl, hasClass } from '../utils'
 import { useSettingStore } from './setting'
 
 export const useGameStore = defineStore('game', () => {
@@ -14,9 +14,9 @@ export const useGameStore = defineStore('game', () => {
     // const confidenceMode = ref('off')
     // const lazyMode = ref('off')
     // // ========== sound sys
-    // const soundVolume = ref('medium')
-    // const soundOnClick = ref('nk creams')
-    // const soundOnError = ref('damage')
+    const soundVolume = ref(0.5) // quiet >> 0.2 | medium >> 0.5 | loud >> 0.9
+    const soundOnClick = ref(getImageUrl('assets/sound/clicks/click.mp3'))
+    const soundOnError = ref(getImageUrl('assets/sound/errors/err_click.wav'))
 
     // ========== Appearance sys
     // const show_keyboard = ref('show')
@@ -46,9 +46,9 @@ export const useGameStore = defineStore('game', () => {
         // confidenceMode,
         // lazyMode,
         // // ----------
-        // soundVolume,
-        // soundOnClick,
-        // soundOnError,
+        soundVolume,
+        soundOnClick,
+        soundOnError,
         // // ----------
         // show_keyboard,
         per

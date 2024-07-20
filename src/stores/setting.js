@@ -1,17 +1,24 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { removeClass, addClass, loadFont } from '@/utils'
-
-import { useGameStore } from './game'
+import { removeClass, addClass, loadFont, playAudio, getImageUrl, playClick } from '@/utils'
 
 export const useSettingStore = defineStore('setting', () => {
-    const gameStore = useGameStore()
+    // All Maps Used ======================================================
+    const soundMap = {
+        off: '',
+        quiet: 0.2,
+        medium: 0.5,
+        loud: 0.8,
+        // ----------
+        'nk creams': getImageUrl('assets/sound/clicks/click.mp3').href,
+        // ----------
+        damage: getImageUrl('assets/sound/errors/err_click.wav').href
+    }
 
-    // paragraph type that can decide what is the option got
-    const para_type = ref('time')
-
-    // For Page Color Mode ===========================
+    // For Page Color Mode ======================================================
+    // current color mode
     const curr_color_mode = ref('superuser')
+    // all color modes
     const color_modes = {
         dark: 'darkMode',
         midnight: 'midnightMode',
@@ -34,8 +41,17 @@ export const useSettingStore = defineStore('setting', () => {
         'red samurai': 'redSamuraiMode',
         peaches: 'peachesMode',
         pastel: 'pastelMode',
-        'modern ink': 'modernInkMode'
+        'modern ink': 'modernInkMode',
+        shadow: 'shadowMode',
+        viridescent: 'viridescentMode',
+        // ============ from ai generation
+        'blue ocean': 'blueOceanMode',
+        'green forest': 'greenForestMode',
+        'sunny yellow': 'sunnyYellowMode',
+        'purple night': 'purpleNightMode',
+        'orange sunset': 'orangeSunsetMode'
     }
+    // toggle the color mode function
     function toggleMode(modeName) {
         let body = document.body
         removeClass(body, color_modes[curr_color_mode.value])
@@ -43,7 +59,7 @@ export const useSettingStore = defineStore('setting', () => {
         addClass(body, color_modes[modeName])
     }
 
-    // For game settings Row ===========================
+    // For game settings Row ======================================================
     // show all option for each type of the paragraphs
     const setting_of_paras = {
         time: [15, 30, 60, 120, 'custom'],
@@ -71,11 +87,13 @@ export const useSettingStore = defineStore('setting', () => {
         }
     }
 
-    // For game settings Page ===========================
+    // For game settings Page ======================================================
     /*
         // set is: array set of available choices to use them
         // func is: the function of this setting to use it
         // def is: default value used in first time
+        // as is: the current value for this setting or the live time value
+        // attrs is: are attributes for (input) type [text, class, id, type, placeholder, min, max, autocomplete, ...]
         // type is: >>>
             input >> custom input (to fill {as} value) by custom value
             button >> one button make a function (more accurate for a function)
@@ -88,7 +106,9 @@ export const useSettingStore = defineStore('setting', () => {
                 def: 'normal',
                 as: 'normal',
                 type: 'many',
-                func: (inp) => (gameStore.testDifficulty = inp),
+                func: function (inp) {
+                    this.as = inp
+                },
                 comment:
                     'Normal is the classic type test experience. Expert fails the test if you submit (press space) an incorrect word. Master fails if you press a single incorrect key (meaning you have to achieve 100% accuracy).',
                 icon: 'mdi:star-shooting'
@@ -98,7 +118,9 @@ export const useSettingStore = defineStore('setting', () => {
                 def: 'esc',
                 as: 'esc',
                 type: 'many',
-                func: (inp) => (gameStore.quickRestart = inp),
+                func: function (inp) {
+                    this.as = inp
+                },
                 comment: `<div class="text"> Press <key>tab</key> ,
 <key>esc</key> or <key>enter</key> to quickly restart the test, or to quickly jump to the test page. These
 options disable tab navigation on most parts of the website. Using the "esc" option will move opening the commandline to the <key>tab</key> key.</div>`,
@@ -111,7 +133,9 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
                 def: 'off',
                 as: 'off',
                 type: 'many',
-                func: (inp) => (gameStore.freedomMode = inp),
+                func: function (inp) {
+                    this.as = inp
+                },
                 comment: `Allows you to delete any word, even if it was typed correctly.`,
                 icon: 'mdi:typewriter'
             },
@@ -120,7 +144,9 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
                 def: 'off',
                 as: 'off',
                 type: 'many',
-                func: (inp) => (gameStore.stopOnError = inp),
+                func: function (inp) {
+                    this.as = inp
+                },
                 comment: `Letter mode will stop input when pressing any incorrect letters. Word mode will not allow you to continue to the next word until you correct all mistakes.`,
                 icon: 'mdi:hand-back-right'
             },
@@ -129,7 +155,9 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
                 def: 'off',
                 as: 'off',
                 type: 'many',
-                func: (inp) => (gameStore.confidenceMode = inp),
+                func: function (inp) {
+                    this.as = inp
+                },
                 comment: `When enabled, you will not be able to go back to previous words to fix mistakes. When turned up to the max, you won't be able to backspace at all.`,
                 icon: 'mdi:backspace'
             },
@@ -138,7 +166,9 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
                 def: 'off',
                 as: 'off',
                 type: 'many',
-                func: (inp) => (gameStore.lazyMode = inp),
+                func: function (inp) {
+                    this.as = inp
+                },
                 comment: `Replaces accents / diacritics / special characters with their normal letter equivalents.`,
                 icon: 'mdi:cradle-outline'
             }
@@ -149,7 +179,9 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
                 def: 'medium',
                 as: 'medium',
                 type: 'many',
-                func: (inp) => (gameStore.soundVolume = inp),
+                func: function (inp) {
+                    this.as = inp
+                },
                 comment: `Change the volume of the sound effects.`,
                 icon: 'mdi:volume-medium'
             },
@@ -158,7 +190,13 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
                 def: 'nk creams',
                 as: 'nk creams',
                 type: 'many',
-                func: (inp) => (gameStore.soundOnClick = inp),
+                func: function (inp) {
+                    this.as = inp
+                    if (inp != 'off') {
+                        let aud = new Audio(soundMap[inp])
+                        playClick(aud, soundMap[compo_game_setting.value.sound['sound volume'].as])
+                    }
+                },
                 comment: `Plays a short sound when you press a key.`,
                 icon: 'mdi:volume-source'
             },
@@ -167,7 +205,13 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
                 def: 'damage',
                 as: 'damage',
                 type: 'many',
-                func: (inp) => (gameStore.soundOnError = inp),
+                func: function (inp) {
+                    this.as = inp
+                    if (inp != 'off') {
+                        let aud = new Audio(soundMap[inp])
+                        playClick(aud, soundMap[compo_game_setting.value.sound['sound volume'].as])
+                    }
+                },
                 comment: `Plays a short sound if you press an incorrect key or press space too early.`,
                 icon: 'mdi:volume-mute'
             }
@@ -176,29 +220,50 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
             'show keyboard': {
                 set: ['off', 'on'],
                 def: 'on',
+                as: 'on',
                 type: 'many',
-                func: (inp) => (gameStore.show_keyboard = inp),
+                func: function (inp) {
+                    this.as = inp
+                },
                 comment: 'display the keyboard animation',
+                icon: 'ph:keyboard-thin'
+            },
+            'keyboard guid': {
+                set: ['off', 'on'],
+                def: 'on',
+                as: 'on',
+                type: 'many',
+                func: function (inp) {
+                    this.as = inp
+                },
+                comment: 'make the keyboard refer to the keys should press on currently, if not (will refer to pressed key only)',
                 icon: 'ph:keyboard-thin'
             },
             'typing speed unit': {
                 set: ['wpm', 'cpm', 'wps', 'cps'],
                 def: 'wpm',
+                as: 'wpm',
                 type: 'many',
-                func: (inp) => (gameStore.per.type = inp),
+                func: function (inp) {
+                    this.as = inp
+                },
                 comment: `Display typing speed in the specified unit.`,
                 icon: 'mdi:car-speed-limiter'
             },
             'font size': {
                 set: [],
                 def: 2,
+                as: 2,
                 type: 'input',
-                'input type': 'number',
                 attrs: {
+                    type: 'number',
+                    placeholder: 'set font size number',
                     min: 1,
                     max: 10
                 },
-                func: (inp) => (gameStore.fontSize = inp),
+                func: function (inp) {
+                    this.as = inp
+                },
                 comment: `Change the font size of the test words.`,
                 icon: 'mdi:format-size'
             },
@@ -242,9 +307,10 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
                     'Varela Round'
                 ],
                 def: 'Lato',
-                func: (font) => {
-                    gameStore.fontName = font
-                    loadFont(font)
+                as: 'Lato',
+                func: function (inp) {
+                    this.as = inp
+                    loadFont(inp)
                 },
                 type: 'many',
                 comment: ``,
@@ -257,7 +323,9 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
                 def: 'off',
                 as: 'off',
                 type: 'many',
-                func: (inp) => (gameStore.flipTestColors = inp),
+                func: function (inp) {
+                    this.as = inp
+                },
                 comment: 'By default, typed text is brighter than the future text. When enabled, the colors will be flipped and the future text will be brighter than the already typed text.',
                 icon: 'mdi:compare'
             },
@@ -266,7 +334,9 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
                 def: 'off',
                 as: 'off',
                 type: 'many',
-                func: (inp) => (gameStore.colorfulMode = inp),
+                func: function (inp) {
+                    this.as = inp
+                },
                 comment: 'When enabled, the test words will use the main color, instead of the text color, making the website more colorful.',
                 icon: 'mdi:format-color-fill'
             },
@@ -275,9 +345,8 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
                 def: curr_color_mode.value,
                 as: curr_color_mode.value,
                 type: 'many',
-                func: (mode) => {
-                    gameStore.currTheme = mode
-                    toggleMode(mode)
+                func: function (inp) {
+                    this.as = inp
                 },
                 comment: '',
                 icon: 'mdi:palette'
@@ -289,7 +358,9 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
                 def: 'show',
                 as: 'show',
                 type: 'many',
-                func: (inp) => (gameStore.outOfFocusWarning = inp),
+                func: function (inp) {
+                    this.as = inp
+                },
                 comment: `Shows an out of focus reminder after 1 second of being 'out of focus' (not being able to type).`,
                 icon: 'tabler:alert-small'
             },
@@ -298,7 +369,9 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
                 def: 'show',
                 as: 'show',
                 type: 'many',
-                func: (inp) => (gameStore.capsLockWarning = inp),
+                func: function (inp) {
+                    this.as = inp
+                },
                 comment: 'Displays a warning when caps lock is on.',
                 icon: 'mdi:alert'
             }
@@ -309,7 +382,11 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
                 set: null,
                 as: null,
                 type: 'button',
-                func: () => {
+                attrs: {
+                    text: 'restart settings',
+                    class: '!text-[var(--bg)] !bg-[var(--error)]'
+                },
+                func: function () {
                     Object.keys(compo_game_setting.value).forEach((row) => {
                         Object.keys(compo_game_setting.value[row]).forEach((set) => {
                             compo_game_setting.value[row][set].as = compo_game_setting.value[row][set].def
@@ -322,5 +399,18 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
         }
     })
 
-    return { para_type, curr_color_mode, color_modes, toggleMode, setting_of_paras, game_setting, liveGameSetting, curr_game_setting, compo_game_setting }
+    return {
+        soundMap,
+        // ----------
+        curr_color_mode,
+        color_modes,
+        toggleMode,
+        // ----------
+        setting_of_paras,
+        game_setting,
+        curr_game_setting,
+        liveGameSetting,
+        // ----------
+        compo_game_setting
+    }
 })

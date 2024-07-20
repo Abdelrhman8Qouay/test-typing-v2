@@ -1,5 +1,7 @@
 // ==================== Active functions ====================
-export function playAudio(aud, audioLoop) {
+// for sound -----------------
+export function playAudio(aud, audioLoop = false) {
+    if (!aud || aud == 'off' || aud == 'hide') return
     // Remove any existing 'ended' event listeners to prevent multiple loops
     aud.removeEventListener('ended', onAudioEnded)
 
@@ -18,12 +20,19 @@ export function onAudioEnded() {
         console.error('Looped audio playback failed:', error)
     })
 }
+export function playClick(aud, vol = 0.4) {
+    if (!aud || aud == 'off' || aud == 'hide') return
 
+    aud.volume = vol
+    aud.play()
+}
 export function pauseEle(ele) {
+    if (!ele) return
     ele.pause()
     ele.currentTime = 0 // Reset the audio to the start
 }
 
+// for characters handles -----------------
 export function isSpaceChar(str) {
     return / [^ ]*$/.test(str)
 }
@@ -35,6 +44,7 @@ export function capitalizeFirstChar(str) {
     return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
+// for class handles -----------------
 export function hasClass(el, className) {
     // if(!el) return false;
 
@@ -68,6 +78,7 @@ export function toggleClass(el, className) {
     }
 }
 
+// for fetch data -----------------
 export async function fetchData(filePath) {
     try {
         const response = await fetch(filePath)
