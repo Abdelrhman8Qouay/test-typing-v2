@@ -11,15 +11,20 @@ export function calculateTypingMetrics(charactersTyped, timeInSeconds) {
     const cps = charactersTyped / timeInSeconds
 
     return {
-        wpm: wpm.toFixed(2),
-        cpm: cpm.toFixed(2),
-        wps: wps.toFixed(2),
-        cps: cps.toFixed(2)
+        wpm: Math.round(wpm),
+        cpm: Math.round(cpm),
+        wps: Math.round(wps),
+        cps: Math.round(cps)
     }
 }
 
 export function strToBool(str) {
     return str == 'on' || str == 'show' ? true : false
+}
+
+// check if the (caps lock) is active or not
+export function isCapsLockActive(ev /* event from keydown on document */) {
+    return ev.getModifierState('CapsLock')
 }
 
 // ==================== Function in DOM ====================

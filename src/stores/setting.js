@@ -10,9 +10,16 @@ export const useSettingStore = defineStore('setting', () => {
         medium: 0.5,
         loud: 0.8,
         // ----------
-        'nk creams': getImageUrl('assets/sound/clicks/click.mp3').href,
+        click: getImageUrl('assets/sound/clicks/click.mp3').href,
+        camera: getImageUrl('assets/sound/clicks/camera.wav').href,
+        'mechanical typewriter': getImageUrl('assets/sound/clicks/mechanical_typewriter.wav').href,
+        tip: getImageUrl('assets/sound/clicks/tip.wav').href,
+        typewriter: getImageUrl('assets/sound/clicks/typewriter.wav').href,
         // ----------
-        damage: getImageUrl('assets/sound/errors/err_click.wav').href
+        arcade: getImageUrl('assets/sound/errors/arcade.wav').href,
+        'game alert': getImageUrl('assets/sound/errors/game_alert.wav').href,
+        'hard typewriter': getImageUrl('assets/sound/errors/hard_typewriter.wav').href,
+        'modern checker': getImageUrl('assets/sound/errors/modern_checker.wav').href
     }
 
     // For Page Color Mode ======================================================
@@ -54,8 +61,8 @@ export const useSettingStore = defineStore('setting', () => {
     // toggle the color mode function
     function toggleMode(modeName) {
         let body = document.body
-        removeClass(body, color_modes[curr_color_mode.value])
-        curr_color_mode.value = modeName
+        removeClass(body, color_modes[compo_game_setting.value.theme.theme.as])
+        compo_game_setting.value.theme.theme.as = modeName
         addClass(body, color_modes[modeName])
     }
 
@@ -186,30 +193,28 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
                 icon: 'mdi:volume-medium'
             },
             'play sound on click': {
-                set: ['off', 'click', 'pop', 'typewriter', 'hit master', 'square', 'nk creams', 'rubber keys'],
-                def: 'nk creams',
-                as: 'nk creams',
+                set: ['off', 'click', 'camera', 'mechanical typewriter', 'tip', 'typewriter'],
+                def: 'camera',
+                as: 'camera',
                 type: 'many',
                 func: function (inp) {
                     this.as = inp
                     if (inp != 'off') {
-                        let aud = new Audio(soundMap[inp])
-                        playClick(aud, soundMap[compo_game_setting.value.sound['sound volume'].as])
+                        playClick(soundMap[inp], soundMap[compo_game_setting.value.sound['sound volume'].as])
                     }
                 },
                 comment: `Plays a short sound when you press a key.`,
                 icon: 'mdi:volume-source'
             },
             'play sound on error': {
-                set: ['off', 'damage', 'square', 'triangle'],
-                def: 'damage',
-                as: 'damage',
+                set: ['off', 'arcade', 'game alert', 'hard typewriter', 'modern checker'],
+                def: 'modern checker',
+                as: 'modern checker',
                 type: 'many',
                 func: function (inp) {
                     this.as = inp
                     if (inp != 'off') {
-                        let aud = new Audio(soundMap[inp])
-                        playClick(aud, soundMap[compo_game_setting.value.sound['sound volume'].as])
+                        playClick(soundMap[inp], soundMap[compo_game_setting.value.sound['sound volume'].as])
                     }
                 },
                 comment: `Plays a short sound if you press an incorrect key or press space too early.`,

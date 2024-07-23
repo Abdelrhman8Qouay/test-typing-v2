@@ -17,7 +17,7 @@
                 <div class="relative" tabindex="0">
                     <span class="flex justify-center items-center opt" @click.self="open_color_mode_menu = !open_color_mode_menu" :class="open_color_mode_menu ? '!text-[var(--highlight)]' : ''">
                         <Icon icon="mdi:theme-light-dark" class="mx-1 inline-block" />
-                        {{ settingStore.curr_color_mode }}</span
+                        {{ compo_game_setting.theme.theme.as }}</span
                     >
                     <ul
                         class="absolute top-full right-0 w-[25vw] max-h-[70vh] overflow-y-auto rounded-md m-0 transition-all duration-200 z-[5000] bg-[var(--sub)] shadow shadow-[var(--caret)]"
@@ -49,10 +49,10 @@ import { ref, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 
 // ===================== Stores =====================
-import { usePublicStore } from '@/stores/public'
-import { useSettingStore } from '@/stores/setting'
-const publicStore = usePublicStore()
+import { storeToRefs } from 'pinia'
+import { useSettingStore } from '@/stores'
 const settingStore = useSettingStore()
+const { compo_game_setting } = storeToRefs(settingStore)
 
 // ========================== Process ==========================
 let open_color_mode_menu = ref(false)

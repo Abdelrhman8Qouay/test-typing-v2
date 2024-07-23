@@ -20,9 +20,10 @@ export function onAudioEnded() {
         console.error('Looped audio playback failed:', error)
     })
 }
-export function playClick(aud, vol = 0.4) {
-    if (!aud || aud == 'off' || aud == 'hide') return
+export function playClick(path, vol = 0.4) {
+    if (!path || path == 'off' || path == 'hide') return
 
+    let aud = new Audio(path)
     aud.volume = vol
     aud.play()
 }

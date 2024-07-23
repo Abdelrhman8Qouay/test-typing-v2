@@ -1,8 +1,7 @@
-import { ref, computed, watch } from 'vue'
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
 import { getImageUrl, hasClass } from '../utils'
-import { useSettingStore } from './setting'
 
 export const useGameStore = defineStore('game', () => {
     // ========== behavior sys
@@ -19,7 +18,6 @@ export const useGameStore = defineStore('game', () => {
     const soundOnError = ref(getImageUrl('assets/sound/errors/err_click.wav'))
 
     // ========== Appearance sys
-    // const show_keyboard = ref('show')
     const per = ref({
         type: 'wpm',
         value: 0

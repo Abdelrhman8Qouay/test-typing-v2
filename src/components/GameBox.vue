@@ -42,7 +42,7 @@
             </div>
             <LeavesAnimate />
 
-            <div class="writerBox">
+            <div class="writerBox" ref="writerBoxEle">
                 <div class="left">
                     <div class="para_container" ref="paraContainerEle" @click="focusInput(typeInput)" v-html="paraContainer"></div>
                     <input
@@ -68,6 +68,14 @@
                     </div>
                     <div class="gameLiveTime text-[var(--highlight)]" ref="gameLiveTimeEle">{{ gameLiveTime }} Seconds</div>
                 </div>
+
+                <div class="out_of_focus" ref="outOfFocusEle">
+                    <span><Icon name="mdi:cursor-default" /> Out of focus, go to the game</span>
+                </div>
+
+                <div class="caps_locked" ref="capsLockedEle">
+                    <span><Icon name="ic:baseline-lock" /> Caps Lock</span>
+                </div>
             </div>
 
             <KeyboardInterface v-if="strToBool(compo_game_setting.appearance['show keyboard'].as)" :char_index="keyboard_char_index" :current_para_content="current_para_content" />
@@ -78,8 +86,8 @@
 
 <script setup>
 // ============ Import ============
-import { ref, onMounted, computed, watch, nextTick } from 'vue'
-import { addClass, removeClass, hasClass, isSpaceChar, focusInput, scrollToActiveLetter, playAudio, pauseEle } from '@/utils'
+import { ref, onMounted, computed, watch, nextTick, onUnmounted } from 'vue'
+import { addClass, removeClass, hasClass, isSpaceChar, focusInput, scrollToActiveLetter, playAudio, pauseEle, playClick, isCapsLockActive } from '@/utils'
 // import game functions
 import { calculateTypingMetrics, strToBool } from '@/utils'
 
@@ -93,7 +101,7 @@ import paras from '@/data/context.json'
 import { storeToRefs } from 'pinia'
 import { usePublicStore, useGameStore, useSettingStore } from '@/stores'
 const { game_setting, curr_game_setting, compo_game_setting } = storeToRefs(useSettingStore())
-const { per } = storeToRefs(useGameStore())
+const { per, soundVolume, soundOnClick, soundOnError } = storeToRefs(useGameStore())
 
 watch(curr_game_setting, async (newVal) => {
     new nextTick()
@@ -130,10 +138,14 @@ const accuracy = ref(0)
 const timeSpent = computed(() => const_time.value - game_timeout.value)
 // ----------------------------
 // DOM elements
+const writerBoxEle = ref(null) // to control the element
 const paraContainer = ref('') // that to fill the html
 const paraContainerEle = ref(null) // to control the element
 const para_letters = ref(null) // all paragraph characters (one by one)
 const typeInput = ref(null) // {input writer}
+
+const outOfFocusEle = ref(null)
+const capsLockedEle = ref(null)
 // live time
 const gameLiveTime = ref(0) // liveTime for the game info
 
@@ -141,11 +153,13 @@ const gameLiveTime = ref(0) // liveTime for the game info
 onMounted(() => {
     try {
         paragraphs.value = paras
-        // clickBegin()
+        clickBegin()
     } catch (err) {
         console.log('Mounted Page Error: ' + err)
     }
 })
+
+onUnmounted(() => endGame())
 
 function clickBegin() {
     // Start the game
@@ -172,6 +186,16 @@ function startGame(paras, const_timeout) {
     // show game
     showBoard.value = false
 
+    // to check user focus
+    if (strToBool(compo_game_setting.value['hide elements']['out of focus warning'].as)) {
+        window.addEventListener('click', (e) => UserFocus(e))
+    }
+
+    // to check Caps Lock
+    if (strToBool(compo_game_setting.value['hide elements']['caps lock warning'].as)) {
+        document.addEventListener('keydown', (e) => CapsLockWarn(e))
+    }
+
     // play background audio
     // backgroundAudio.value = new Audio(getImageUrl(current_para.value.audio))
     // console.log(getImageUrl(current_para.value.audio))
@@ -186,6 +210,16 @@ function endGame() {
     // pause background audio
     if (backgroundAudio.value) {
         pauseEle(backgroundAudio.value)
+    }
+
+    // remove the event listener
+    if (strToBool(compo_game_setting.value['hide elements']['out of focus warning'].as)) {
+        window.removeEventListener('click', (e) => UserFocus(e))
+    }
+
+    // to check Caps Lock
+    if (strToBool(compo_game_setting.value['hide elements']['caps lock warning'].as)) {
+        document.removeEventListener('keydown', (e) => CapsLockWarn(e))
     }
 
     // hide game
@@ -244,7 +278,7 @@ function spacePressed(e, input_char_index) {
             addClass(para_letters.value[para_char_num.value], 'letter-active') // add active for new char
             keyboard_char_index.value = para_char_num.value // activeKeyboardKey() // add active for new char on keyboard
             e.target.value = ''
-            playAudio(usePublicStore().sound_click.click, false)
+            playClick(soundOnClick.value, soundVolume.value)
 
             // if ended the paragraph >> endGame
             if (!current_para_content.value[para_char_num.value] && !isSpaceChar(current_para_content.value[para_char_num.value])) {
@@ -280,7 +314,7 @@ function backPressed(e, input_char_index) {
         }
 
         // play sound
-        playAudio(usePublicStore().sound_click.click, false)
+        playClick(soundOnClick.value, soundVolume.value)
     } else {
         // go back by classes
         letterBack(para_char_num.value /*this current char_index*/, para_char_num.value - 1 /*this old char_index*/)
@@ -293,7 +327,7 @@ function backPressed(e, input_char_index) {
         }
 
         // play sound
-        playAudio(usePublicStore().sound_click.click, false)
+        playClick(soundOnClick.value, soundVolume.value)
     }
 }
 function normalPressed(e, input_char_index) {
@@ -303,7 +337,7 @@ function normalPressed(e, input_char_index) {
         content.value[words_done.value][input_char_index - 1].includes(e.target.value[input_char_index - 1])
     ) {
         letterActive(para_char_num.value, 'done', this)
-        playAudio(usePublicStore().sound_click.click, false)
+        playClick(soundOnClick.value, soundVolume.value)
         para_char_num.value++ // then go next
         total_chars_typed.value++
         correct_chars.value++
@@ -367,6 +401,24 @@ function keyActivated(e) {
     event_key.value.key = e.key
 }
 
+function UserFocus(e) {
+    let curr = e.target
+    if (curr == typeInput.value || curr == paraContainerEle.value || curr == outOfFocusEle.value) {
+        focusInput(typeInput.value)
+        if (hasClass(writerBoxEle.value, 'out_of_focus')) removeClass(writerBoxEle.value, 'out_of_focus')
+    } else {
+        if (!hasClass(writerBoxEle.value, 'out_of_focus')) addClass(writerBoxEle.value, 'out_of_focus')
+    }
+}
+
+function CapsLockWarn(e) {
+    if (isCapsLockActive(e)) {
+        if (!hasClass(writerBoxEle.value, 'caps_lock_active')) addClass(writerBoxEle.value, 'caps_lock_active')
+    } else {
+        if (hasClass(writerBoxEle.value, 'caps_lock_active')) removeClass(writerBoxEle.value, 'caps_lock_active')
+    }
+}
+
 // activate the letter in the paragraph
 function letterActive(char_index, char_status) {
     if (char_index < 0) return
@@ -420,10 +472,8 @@ function letterBack(currChar_index, toChar_index) {
 
 // (play the error audio sound) (if not audio only >> add the class) for error click press
 function clickError(el, className, audOnly = false) {
-    console.log(usePublicStore().sound_click.err.src)
     if (!audOnly && el && className) addClass(el, className)
-    let pressKeyAud = new Audio(usePublicStore().sound_click.err)
-    playAudio(pressKeyAud, false)
+    playClick(soundOnError.value, soundVolume.value)
 }
 
 // --------------- Info game ---------------
@@ -646,6 +696,30 @@ async function addParagraph() {
             color: var(--main);
             @include font-custom(27px, 600);
         }
+    }
+
+    .out_of_focus {
+        color: var(--highlight);
+        backdrop-filter: blur(4px);
+        background: var(--bg);
+        filter: opacity(0.8);
+
+        position: absolute;
+        left: 0;
+        top: 0;
+        @include wh-full;
+        @include flex-center;
+        font-size: 20px;
+        font-weight: 300;
+        z-index: 1000;
+
+        transition: all var(--hover-trans);
+        visibility: hidden;
+        opacity: 0;
+    }
+    &.out_of_focus .out_of_focus {
+        visibility: visible;
+        opacity: 1;
     }
 }
 /* Writer Box End */
