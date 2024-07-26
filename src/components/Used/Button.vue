@@ -4,7 +4,7 @@
         class="btn hover:shadow-md hover:shadow-black px-4 py-1 max-md:!text-xs max-md:!font-extralight border-none transition flex justify-center items-center uppercase"
         :class="txtColor ? txtColor : 'main_clear-text'"
     >
-        <Icon v-if="ico" :icon="ico" :color="icoColor ? icoColor : '#fff'" :height="icoSize ? icoSize : 24" /> {{ txt }}<slot></slot>
+        <Icon v-if="ico" :icon="ico" :color="icoColor" :height="icoSize ? icoSize : 24" /> {{ txt }}<slot></slot>
     </button>
     <a
         v-else
@@ -13,7 +13,7 @@
         :class="txtColor ? txtColor : 'main_clear-text'"
         :href="url"
     >
-        <Icon v-if="ico" :icon="ico" :color="icoColor ? icoColor : '#fff'" :height="icoSize ? icoSize : 24" /> {{ txt }}<slot></slot>
+        <Icon v-if="ico" :icon="ico" :color="icoColor" :height="icoSize ? icoSize : 24" /> {{ txt }}<slot></slot>
     </a>
 </template>
 

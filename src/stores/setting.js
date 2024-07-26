@@ -69,27 +69,36 @@ export const useSettingStore = defineStore('setting', () => {
     // For game settings Row ======================================================
     // show all option for each type of the paragraphs
     const setting_of_paras = {
-        time: [15, 30, 60, 120, 'custom'],
-        words: [10, 25, 50, 100, 'custom'],
-        quote: ['short', 'medium', 'long']
+        time: {
+            set: [15, 30, 60, 120],
+            icon: 'fluent:timer-28-regular'
+        },
+        words: {
+            set: [10, 25, 50, 100],
+            icon: 'ph:newspaper-light'
+        },
+        quote: {
+            set: ['short', 'medium', 'long'],
+            icon: 'lets-icons:paper-light'
+        }
     }
     // paragraph type that can decide what is the option got
-    const game_setting = ref({
+    const game_state = ref({
         type: 'time',
         setting: setting_of_paras['time']
     })
-    const curr_game_setting = ref(game_setting.value.setting[0]) // 15 or 'short' or (one of any from settings)
+    const curr_game_state = ref(game_state.value.setting[0]) // 15 or 'short' or (one of any from settings)
     function liveGameSetting(value /* ex: words <string> */, toClick) {
         if (toClick == 'type') {
-            game_setting.value.type = value
-            game_setting.value.setting = setting_of_paras[value]
-            curr_game_setting.value = game_setting.value.setting[0]
+            game_state.value.type = value
+            game_state.value.setting = setting_of_paras[value]
+            curr_game_state.value = game_state.value.setting[0]
         } else if (toClick == 'setting') {
             if (value == 'custom') {
                 // do nothing now <<< @@@@@@@@@@@@@@@@@@@
-                curr_game_setting.value = value
+                curr_game_state.value = value
             } else {
-                curr_game_setting.value = value
+                curr_game_state.value = value
             }
         }
     }
@@ -119,6 +128,17 @@ export const useSettingStore = defineStore('setting', () => {
                 comment:
                     'Normal is the classic type test experience. Expert fails the test if you submit (press space) an incorrect word. Master fails if you press a single incorrect key (meaning you have to achieve 100% accuracy).',
                 icon: 'mdi:star-shooting'
+            },
+            'incorrect stop': {
+                set: ['off', 'on'],
+                def: 'on',
+                as: 'on',
+                type: 'many',
+                func: function (inp) {
+                    this.as = inp
+                },
+                comment: 'When make incorrect letter will stop you to make another incorrect letter (Forces the correct letter after incorrect, and so on)',
+                icon: 'game-icons:stop-sign'
             },
             'quick restart': {
                 set: ['off', 'tab', 'enter', 'esc'],
@@ -412,8 +432,8 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
         toggleMode,
         // ----------
         setting_of_paras,
-        game_setting,
-        curr_game_setting,
+        game_state,
+        curr_game_state,
         liveGameSetting,
         // ----------
         compo_game_setting

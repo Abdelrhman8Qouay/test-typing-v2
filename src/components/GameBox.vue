@@ -2,94 +2,120 @@
 <template>
     <div class="game">
         <!-- Ready Page  -->
-        <div class="board_box w-full h-full flex flex-col justify-center align-center" :class="!showBoard ? 'hide' : ''">
-            <div class="containInfo">
-                <div class="box">
-                    <h2>{{ per.type }}</h2>
-                    <span id="wpm" ref="wpmEle">{{ per.value }}</span>
-                </div>
-                <div class="box">
-                    <h2>acc</h2>
-                    <span id="accuracy" ref="accuracyEle">{{ accuracy }} %</span>
-                </div>
-
-                <!-- Start Button -->
-                <Button id="btnStart" class="!bg-[var(--main)]" @click.prevent="clickBegin()" :is-button="true" txt="Begin" ico="keyboard-variant" :ico-size="22" />
-
-                <div class="res">
-                    <div class="box">
-                        <h2>words</h2>
-                        <span id="words_num" ref="wordsEle">{{ words_done }}</span>
-                    </div>
-                    <div class="box">
-                        <h2>chars</h2>
-                        <span id="chars_num" ref="charsEle">{{ total_chars_typed }}</span>
-                    </div>
-                    <div class="box">
-                        <h2>time</h2>
-                        <span id="time_game_done" ref="gameTimeEle">{{ timeSpent }}</span>
-                    </div>
+        <transition name="fade" appear>
+            <div v-if="showBoard" class="board_box w-full h-full flex gap-5 flex-col mt-5">
+                <div class="w-full h-16 bg-[var(--sub)] rounded-lg"></div>
+                <div class="flex justify-center items-center">
+                    <GameSettings />
                 </div>
             </div>
-
-            <div class="setting"></div>
-        </div>
+        </transition>
 
         <!-- Game Page  -->
-        <div class="game_box" :class="showBoard ? 'hide' : ''">
-            <div class="flex justify-center items-center">
-                <GameSettings />
-            </div>
-            <LeavesAnimate />
+        <transition name="fade" appear>
+            <div class="game_box" v-if="!showBoard">
+                <LeavesAnimate />
 
-            <div class="writerBox" ref="writerBoxEle">
-                <div class="left">
-                    <div class="para_container" ref="paraContainerEle" @click="focusInput(typeInput)" v-html="paraContainer"></div>
-                    <input
-                        ref="typeInput"
-                        id="userInput"
-                        type="text"
-                        name="front"
-                        tabindex="0"
-                        @keydown="(e) => keyActivated(e)"
-                        @input="(e) => typing(e)"
-                        placeholder="type here..."
-                        autocomplete="off"
-                    />
-                </div>
-                <div class="right">
-                    <div class="box">
-                        <h2>{{ per.type }}</h2>
-                        <span id="wpmLive" ref="wpmLiveTimeEle">{{ per.value }}</span>
+                <div class="writerBox" ref="writerBoxEle">
+                    <div class="info">
+                        <div class="box">
+                            <h2>{{ userInfo.per.type }}</h2>
+                            <span id="wpmLive" ref="wpmLiveTimeEle">{{ userInfo.per.value }}</span>
+                        </div>
+                        <div class="box">
+                            <h2>acc</h2>
+                            <span id="accuracyLive" ref="accLiveTimeEle">{{ accuracy }} %</span>
+                        </div>
+                        <div class="gameLiveTime text-[var(--highlight)]" ref="gameLiveTimeEle">
+                            <h2>{{ game_timeout }}</h2>
+                            <span id="accuracyLive" ref="accLiveTimeEle">Seconds</span>
+                        </div>
                     </div>
-                    <div class="box">
-                        <h2>acc</h2>
-                        <span id="accuracyLive" ref="accLiveTimeEle">{{ accuracy }} %</span>
+
+                    <div class="game">
+                        <div class="para_container" ref="paraContainerEle" @click="focusInput(typeInput)" v-html="paraContainer"></div>
+                        <input
+                            ref="typeInput"
+                            id="userInput"
+                            type="text"
+                            name="front"
+                            tabindex="0"
+                            @keydown="(e) => keyActivated(e)"
+                            @input="(e) => typing(e)"
+                            placeholder="type here..."
+                            autocomplete="off"
+                        />
                     </div>
-                    <div class="gameLiveTime text-[var(--highlight)]" ref="gameLiveTimeEle">{{ gameLiveTime }} Seconds</div>
+
+                    <div class="out_of_focus" ref="outOfFocusEle">
+                        <div><Icon icon="mdi:cursor-default" /></div>
+                        <span>Out of focus, go to the game</span>
+                    </div>
+
+                    <div class="caps_locked" ref="capsLockedEle">
+                        <div><Icon icon="ic:baseline-lock" /></div>
+                        <span>Caps Lock</span>
+                    </div>
                 </div>
 
-                <div class="out_of_focus" ref="outOfFocusEle">
-                    <span><Icon name="mdi:cursor-default" /> Out of focus, go to the game</span>
-                </div>
+                <KeyboardInterface v-if="strToBool(compo_game_setting.appearance['show keyboard'].as)" :char_index="keyboard_char_index" :current_para_content="para_content_text" />
+            </div>
+        </transition>
 
-                <div class="caps_locked" ref="capsLockedEle">
-                    <span><Icon name="ic:baseline-lock" /> Caps Lock</span>
+        <!-- Info Modal -->
+        <transition name="fade">
+            <div v-if="showModal" class="modal bg-[#0000009a] flex justify-center items-center fixed left-0 top-0 w-screen h-screen z-[12000]">
+                <!-- Close Button -->
+                <div class="text-[var(--highlight)] text-4xl absolute left-10 top-10 cursor-pointer" @click="showModal = false"><Icon icon="ei:close" /></div>
+                <!-- Box Of Modal -->
+                <div class="box w-max h-max bg-[var(--bg)] rounded-lg p-4">
+                    <!-- Content here... -->
+                    <div class="flex justify-around">
+                        <div class="box">
+                            <h2>{{ userInfo.per.type.toUpperCase() }}</h2>
+                            <span id="wpm" ref="wpmEle">{{ userInfo.per.value }}</span>
+                        </div>
+                        <div class="box">
+                            <h2>Accuracy</h2>
+                            <span id="accuracy" ref="accuracyEle">{{ accuracy }} %</span>
+                        </div>
+                    </div>
+
+                    <div class="res !justify-around">
+                        <div class="box">
+                            <h2>time</h2>
+                            <span id="time_game_done" ref="gameTimeEle">{{ timeSpent }}</span>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="box boxFull" title="total characters">
+                                <h2>* /</h2>
+                                <span>{{ total_chars_typed }}</span>
+                            </div>
+                            <div class="box" title="correct characters">
+                                <h2>correct /</h2>
+                                <span>{{ correct_chars }}</span>
+                            </div>
+                            <div class="box" title="words typed">
+                                <h2>words</h2>
+                                <span id="words_num" ref="wordsEle">{{ words_done }}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <KeyboardInterface v-if="strToBool(compo_game_setting.appearance['show keyboard'].as)" :char_index="keyboard_char_index" :current_para_content="current_para_content" />
-        </div>
+        </transition>
     </div>
 </template>
 
 
 <script setup>
 // ============ Import ============
-import { ref, onMounted, computed, watch, nextTick, onUnmounted } from 'vue'
-import { addClass, removeClass, hasClass, isSpaceChar, focusInput, scrollToActiveLetter, playAudio, pauseEle, playClick, isCapsLockActive } from '@/utils'
-// import game functions
-import { calculateTypingMetrics, strToBool } from '@/utils'
+import { ref, onMounted, computed, watch, nextTick, onUnmounted, onBeforeUnmount } from 'vue'
+
+import { Icon } from '@iconify/vue'
+
+import { addClass, removeClass, hasClass, isSpaceChar, focusInput, playAudio, pauseEle, playClick } from '@/utils'
+import { calculateTypingMetrics, strToBool, isCapsLockActive, scrollToActiveLetter } from '@/utils'
 
 import GameSettings from '@/components/Main/GameSettings.vue'
 import LeavesAnimate from '@/components/Used/LeavesAnimate.vue'
@@ -100,10 +126,10 @@ import paras from '@/data/context.json'
 // ===================== Stores =====================
 import { storeToRefs } from 'pinia'
 import { usePublicStore, useGameStore, useSettingStore } from '@/stores'
-const { game_setting, curr_game_setting, compo_game_setting } = storeToRefs(useSettingStore())
-const { per, soundVolume, soundOnClick, soundOnError } = storeToRefs(useGameStore())
+const { game_state, curr_game_state, compo_game_setting } = storeToRefs(useSettingStore())
+const { userInfo, soundVolume, soundOnClick, soundOnError } = storeToRefs(useGameStore())
 
-watch(curr_game_setting, async (newVal) => {
+watch(curr_game_state, async (newVal) => {
     new nextTick()
     clickBegin()
 })
@@ -111,16 +137,17 @@ watch(curr_game_setting, async (newVal) => {
 // ===================== Variables =====================
 const paragraphs = ref(null)
 const showBoard = ref(true)
+const showModal = ref(true)
 const backgroundAudio = ref(null)
 
 // ---------------------------- Game variables
 // paragraph variables
-const const_time = ref(curr_game_setting.value)
+const const_time = ref(curr_game_state.value)
 const game_timeout = ref(const_time.value)
 const random_para = ref(0) // random number with length of paragraphs exists
 const current_para = ref(null) // get random content from data
-const current_para_content = ref(null) // get the content of para
-const content = ref(null) // split all context to words separate by (space)
+const para_content_text = ref(null) // get the content of para
+const splittedContent = ref(null) // split all context to words separate by (space)
 
 // main options when play {typing racer game}
 const para_char_num = ref(0) // the total character numbers of paragraph as [index] {access on all chars in para}
@@ -146,24 +173,24 @@ const typeInput = ref(null) // {input writer}
 
 const outOfFocusEle = ref(null)
 const capsLockedEle = ref(null)
-// live time
-const gameLiveTime = ref(0) // liveTime for the game info
 
 // ===================== Functions =====================
+// when mounted
 onMounted(() => {
     try {
         paragraphs.value = paras
-        clickBegin()
+        // clickBegin()
     } catch (err) {
         console.log('Mounted Page Error: ' + err)
     }
 })
 
-onUnmounted(() => endGame())
+// before leave the component
+onBeforeUnmount(() => endGame())
 
-function clickBegin() {
-    // Start the game
-    startGame(paragraphs.value, curr_game_setting.value /*const_time*/)
+// Start the game
+const clickBegin = () => {
+    startGame(paragraphs.value, curr_game_state.value /*const_time*/)
 }
 
 // ===================== Game Functions =====================
@@ -174,17 +201,17 @@ function startGame(paras, const_timeout) {
     game_timeout.value = const_timeout
     random_para.value = Math.floor(Math.random() * paras.length) // random number with length of paragraphs exists
     current_para.value = paras[random_para.value] // get random content from data
-    content.value = current_para.value.para.split(' ')
-    current_para_content.value = paras[random_para.value].para // get the content of the paragraph
+    splittedContent.value = current_para.value.para.split(' ')
+    para_content_text.value = paras[random_para.value].para // get the content of the paragraph
+
+    // show game
+    showBoard.value = false
 
     // return to default
     defaultGameInfo()
 
     // then add the paragraph
     addParagraph()
-
-    // show game
-    showBoard.value = false
 
     // to check user focus
     if (strToBool(compo_game_setting.value['hide elements']['out of focus warning'].as)) {
@@ -203,9 +230,10 @@ function startGame(paras, const_timeout) {
 }
 // ending the game
 function endGame() {
+    clearInterval(game_stop.value)
+
     // put the result of the last game
-    per.value.value = calculateTypingMetrics(para_char_num.value, timeSpent.value)[per.value.type]
-    accuracy.value = accCalc()
+    setUserInfo()
 
     // pause background audio
     if (backgroundAudio.value) {
@@ -224,6 +252,9 @@ function endGame() {
 
     // hide game
     showBoard.value = true
+
+    // show modal info
+    showModal.value = true
 }
 
 // ------------------ While Typing ------------------
@@ -254,47 +285,73 @@ function typing(e) {
         normalPressed(e, input_char_index)
     }
 
-    per.value.value = calculateTypingMetrics(para_char_num.value, timeSpent.value)[per.value.type]
+    console.log('correct: ' + correct_chars.value + ' total: ' + total_chars_typed.value)
+
+    userInfo.value.per.value = calculateTypingMetrics(para_char_num.value, timeSpent.value)[userInfo.value.per.type]
     accuracy.value = accCalc()
 }
 function spacePressed(e, input_char_index) {
+    let inputEle = e.target
+    // if input Empty >> stop add new char for {input writer}
     if (!input_char_index) {
-        // if input Empty >> stop add new char for {input writer}
-        if (hasClass(e.target, 'error')) {
-            removeClass(e.target, 'error')
+        if (hasClass(inputEle, 'error')) {
+            removeClass(inputEle, 'error')
         }
-        e.target.value = e.target.value.slice(0, input_char_index - 1) // stop add new char for {input writer}
-    } else {
+
+        // stop add new char for {input writer}
+        inputEle.value = inputEle.value.slice(0, input_char_index - 1)
+
         // if input not Empty >>
-        if (e.target.value.trim() != content.value[words_done.value]) {
-            // if input.trim(remove spaces) not= content[wordsIndex] >>>
-            clickError(e.target, null, true) // make error for {input writer}
-            e.target.value = e.target.value.slice(0, input_char_index - 1) // stop add new char for {input writer}
+    } else {
+        // if input not= content[currWords] >>>
+        if (inputEle.value.trim() != splittedContent.value[words_done.value]) {
+            // make error for {input writer}
+            clickError(inputEle, null, true)
+
+            // stop add new char for {input writer}
+            inputEle.value = inputEle.value.slice(0, input_char_index - 1)
+
+            // if expert or master (user) >>> endGame
+            let diff = compo_game_setting.value['behavior']['test difficulty'].as
+            if (diff == 'expert' || diff == 'master') {
+                endGame()
+                return
+            }
+
+            // if input == content[currWord] >>> continue
         } else {
-            // if {input writer} == content[wordsIndex] >>> the space key is true then continue
-            words_done.value++ // add words done
-            removeClass(para_letters.value[para_char_num.value], 'letter-active') // remove active for space char
-            para_char_num.value++ // from space char to first char in new word
-            addClass(para_letters.value[para_char_num.value], 'letter-active') // add active for new char
-            keyboard_char_index.value = para_char_num.value // activeKeyboardKey() // add active for new char on keyboard
-            e.target.value = ''
-            playClick(soundOnClick.value, soundVolume.value)
+            // add words done
+            words_done.value++
 
             // if ended the paragraph >> endGame
-            if (!current_para_content.value[para_char_num.value] && !isSpaceChar(current_para_content.value[para_char_num.value])) {
+            if (words_done.value > splittedContent.value.length) {
                 endGame()
+                return
             }
+
+            removeClass(para_letters.value[para_char_num.value], 'letter-active') // remove active for space char
+            // from space char to first char in new word
+            para_char_num.value++
+            // add active for new char
+            addClass(para_letters.value[para_char_num.value], 'letter-active')
+
+            // activeKeyboardKey() // add active for new char on keyboard
+            keyboard_char_index.value = para_char_num.value
+
+            inputEle.value = ''
+            playClick(soundOnClick.value, soundVolume.value)
         }
     }
 }
 function backPressed(e, input_char_index) {
+    let inputEle = e.target
     if (input_char_index < 0) {
         // if {input writer} Empty >>> do nothing
-        if (hasClass(e.target, 'error')) {
-            removeClass(e.target, 'error')
+        if (hasClass(inputEle, 'error')) {
+            removeClass(inputEle, 'error')
         }
         false
-    } else if (input_char_index >= 0 && !isSpaceChar(content.value[words_done.value][input_char_index - 1])) {
+    } else if (input_char_index >= 0 && !isSpaceChar(splittedContent.value[words_done.value][input_char_index - 1])) {
         // if the previous letter hasClass done >> correct_chars--
         if (hasClass(para_letters.value[para_char_num.value - 1], 'done')) {
             correct_chars.value--
@@ -307,9 +364,9 @@ function backPressed(e, input_char_index) {
         total_chars_typed.value--
 
         // remove {error input} if input true || input empty
-        if (content.value[words_done.value].includes(e.target.value) || !e.target.value) {
-            if (!hasClass(e.target, 'error')) {
-                removeClass(e.target, 'error')
+        if (splittedContent.value[words_done.value].includes(inputEle.value) || !inputEle.value) {
+            if (!hasClass(inputEle, 'error')) {
+                removeClass(inputEle, 'error')
             }
         }
 
@@ -320,7 +377,7 @@ function backPressed(e, input_char_index) {
         letterBack(para_char_num.value /*this current char_index*/, para_char_num.value - 1 /*this old char_index*/)
 
         // remove {error input} if input true || input empty
-        if (content.value[words_done.value].includes(e.target.value) || !e.target.value) {
+        if (splittedContent.value[words_done.value].includes(e.target.value) || !e.target.value) {
             if (!hasClass(e.target, 'error')) {
                 removeClass(e.target, 'error')
             }
@@ -331,42 +388,65 @@ function backPressed(e, input_char_index) {
     }
 }
 function normalPressed(e, input_char_index) {
+    let inputEle = e.target
     // if input[char] == content[char]
-    if (
-        e.target.value[input_char_index - 1] == content.value[words_done.value][input_char_index - 1] &&
-        content.value[words_done.value][input_char_index - 1].includes(e.target.value[input_char_index - 1])
-    ) {
+    if (inputEle.value[input_char_index - 1] == splittedContent.value[words_done.value][input_char_index - 1]) {
+        // before move to the next
         letterActive(para_char_num.value, 'done', this)
         playClick(soundOnClick.value, soundVolume.value)
-        para_char_num.value++ // then go next
+
+        // then go next
+        para_char_num.value++
         total_chars_typed.value++
         correct_chars.value++
-        if (hasClass(e.target, 'error')) {
-            removeClass(e.target, 'error')
+        if (hasClass(inputEle, 'error')) {
+            removeClass(inputEle, 'error')
         }
-        if (!current_para_content.value[para_char_num.value] && current_para_content.value[para_char_num.value] != '&nbsp') {
+
+        // if (last character) >>> endGame
+        if (para_char_num.value > para_content_text.value.length) {
             endGame()
+            return
         }
+
+        // else {that is meaning this char is incorrect}
     } else {
-        // else {that is meaning this char is not correct}
-        if (para_letters.value[para_char_num.value - 1]) {
+        // if incorrect stop (on) >>>
+        let incStop = compo_game_setting.value['behavior']['incorrect stop'].as
+        if (strToBool(incStop)) {
             // if the letter before last exists >>>
-            if (hasClass(para_letters.value[para_char_num.value - 1], 'error')) {
+            if (para_letters.value[para_char_num.value - 1]) {
                 // if before last has error >>> stop add new char for {input type}
-                clickError(null, null, true) //open audio error only
-                e.target.value = e.target.value.slice(0, input_char_index - 1) // stop add new char for {input type}
+                if (hasClass(para_letters.value[para_char_num.value - 1], 'error')) {
+                    clickError(null, null, true) //open audio error only
+                    inputEle.value = inputEle.value.slice(0, input_char_index - 1) // stop add new char for {input type}
+                    // else >>> make error on this char
+                } else {
+                    continueErr()
+                }
+                // if before last is not exists >>> go next
             } else {
-                // else >>> make error on this char
-                clickError(e.target, 'error')
-                letterActive(para_char_num.value, 'error') // make error on this char
-                para_char_num.value++ // then go next
-                total_chars_typed.value++
+                continueErr()
             }
         } else {
-            // if before last is not exists >>> go next
-            clickError(e.target, 'error')
-            letterActive(para_char_num.value, 'error', this) // make error on this char
-            para_char_num.value++ // then go next
+            continueErr()
+        }
+
+        function continueErr() {
+            // make all operations
+            clickError(inputEle, 'error')
+            letterActive(para_char_num.value, 'error')
+
+            // then go next
+            para_char_num.value++
+            total_chars_typed.value++
+        }
+
+        // if master (user) >>> endGame
+        let diff = compo_game_setting.value['behavior']['test difficulty'].as
+        if (diff == 'master') {
+            endGame()
+            return
         }
     }
 }
@@ -376,9 +456,9 @@ function normalPressed(e, input_char_index) {
 function checkGameTime() {
     game_stop.value = setInterval(() => {
         // info changed
-        game_timeout.value--
-        gameLiveTime.value = game_timeout.value
-        per.value.value = calculateTypingMetrics(para_char_num.value, timeSpent.value)[per.value.type]
+        gameLiveTime.value = --game_timeout.value
+        userInfo.value.time = gameLiveTime.value
+        userInfo.value.per.value = calculateTypingMetrics(para_char_num.value, timeSpent.value)[userInfo.value.per.type]
 
         // if the time is 0 >>> endGame
         if (game_timeout.value <= 0) {
@@ -480,6 +560,13 @@ function clickError(el, className, audOnly = false) {
 function defaultGameInfo() {
     paraContainerEle.value.scrollLeft = 0
     paraContainer.value = ''
+
+    let spans = document.querySelectorAll('.writerBox .para_container .letter')
+    spans.forEach((s) => {
+        if (hasClass(s, 'done')) removeClass(s, 'done')
+        if (hasClass(s, 'error')) removeClass(s, 'error')
+    })
+
     if (game_stop.value) clearInterval(game_stop.value)
     gameLiveTime.value = const_time.value // live Time
     typeInput.value.value = ''
@@ -494,8 +581,36 @@ function defaultGameInfo() {
     first_type.value = false
     keyboard_char_index.value = 5
 
-    per.value.value = 0
-    accuracy.value = 0
+    setUserInfo(true)
+}
+
+function setUserInfo(to_default = false) {
+    if (to_default) {
+        userInfo.value.per.value = 0
+        accuracy.value = 0
+        userInfo.value.accuracy = accuracy.value
+        userInfo.value.are = 'turtle'
+        userInfo.value.correct = 0
+        userInfo.value.total = 0
+        userInfo.value.time = 0
+        return
+    }
+    userInfo.value.per.value = calculateTypingMetrics(para_char_num.value, timeSpent.value)[userInfo.value.per.type]
+    accuracy.value = accCalc()
+    userInfo.value.time = timeSpent.value
+    userInfo.value.accuracy = accuracy.value
+    userInfo.value.correct = correct_chars.value
+    userInfo.value.total = total_chars_typed.value
+    const nicknames = [
+        { maxSpeed: 10, nickname: 'sloth', message: 'You are a sloth, take it slow.' },
+        { maxSpeed: 20, nickname: 'turtle', message: 'You are a turtle, steady and sure.' },
+        { maxSpeed: 30, nickname: 'cheetah', message: 'You are a cheetah, blazing fast!' },
+        { maxSpeed: 40, nickname: 'eagle', message: 'You are an eagle, soaring high!' },
+        { maxSpeed: 50, nickname: 'octopus', message: 'You are an octopus, amazing multitasking!' },
+        { maxSpeed: Infinity, nickname: 'lightning', message: 'You are lightning, blazing ahead!' }
+    ]
+    const { nickname, message } = nicknames.find((n) => userInfo.value.per.value <= n.maxSpeed)
+    userInfo.value.are = nickname
 }
 
 async function addParagraph() {
@@ -503,12 +618,12 @@ async function addParagraph() {
     paraContainer.value = ''
 
     // the first char added
-    paraContainer.value += `<span class="letter letter-active start_char" data-char="${current_para_content.value[0]}">${current_para_content.value[0]}</span>`
+    paraContainer.value += `<span class="letter letter-active start_char" data-char="${para_content_text.value[0]}">${para_content_text.value[0]}</span>`
     keyboard_char_index.value = 0 //KeyboardI.activeKeyboardKey(0, gameObj)
 
     // iterate for all chars
-    for (let i = 1; i < current_para_content.value.length; i++) {
-        paraContainer.value += `<span class="letter" data-char="${current_para_content.value[i]}">${current_para_content.value[i]}</span>`
+    for (let i = 1; i < para_content_text.value.length; i++) {
+        paraContainer.value += `<span class="letter" data-char="${para_content_text.value[i]}">${para_content_text.value[i]}</span>`
     }
 
     await nextTick()
@@ -523,46 +638,40 @@ async function addParagraph() {
 @import '../assets/css/mixins';
 
 /* Board Box Start */
-.board_box {
-    &.hide {
-        display: none;
-    }
-
-    .containInfo {
+.modal {
+    .res {
+        margin-top: 2.5rem;
+        @include wh-custom(100%, max-content);
+        @include rounded-lg;
         display: flex;
-        flex-direction: column;
-        gap: 10px;
+        justify-content: space-between;
+
         .box {
-            @include flex-custom(column, nowrap, space-between, start);
+            @include flex-custom(column, nowrap, space-between, center);
 
             h2 {
                 color: var(--text);
-                @include font-custom(26px, 500);
+                @include font-custom(22px, 500);
             }
             span {
                 color: var(--main);
-                @include font-custom(32px, 600);
+                @include font-custom(27px, 600);
             }
         }
 
-        .res {
-            margin-top: 2.5rem;
-            @include wh-custom(100%, max-content);
-            @include rounded-lg;
-            display: flex;
-            justify-content: space-between;
+        .boxFull {
+            @include flex-center-col;
+            border-radius: 6px;
+            background: var(--sub);
+            padding: 2px 12px;
 
-            .box {
-                @include flex-custom(column, nowrap, space-between, center);
-
-                h2 {
-                    color: var(--text);
-                    @include font-custom(22px, 500);
-                }
-                span {
-                    color: var(--main);
-                    @include font-custom(27px, 600);
-                }
+            h2 {
+                color: var(--text);
+                @include font-custom(22px, 500);
+            }
+            span {
+                color: var(--main);
+                @include font-custom(27px, 600);
             }
         }
     }
@@ -582,13 +691,9 @@ async function addParagraph() {
     user-select: none;
     padding: 1rem;
     z-index: 20;
-    display: flex;
-    flex-direction: row;
-    gap: 1.5rem;
 
-    .left {
+    .game {
         padding: 1.2rem;
-        width: 70%;
         .para_container {
             white-space: break-spaces;
             overflow: hidden;
@@ -667,34 +772,66 @@ async function addParagraph() {
 
         #userInput {
             display: block;
-            @include font-custom(25px, 600);
-            color: black;
+            border: unset;
+            outline: none;
+            @include wh-custom(100%, max-content);
+            border-radius: 6px;
+            font-size: 25px;
+            font-weight: 600;
+
+            box-shadow: 0 4px 8px var(--sub);
             margin-top: 2rem;
             padding: 0.5rem 1rem;
-            @include wh-custom(100%, max-content);
-
+            color: var(--main);
+            background-color: var(--text);
             &.error {
                 background-color: var(--error-extra);
             }
-        }
-
-        .game_time {
-            text-align: end;
-            font-size: 16px;
-            font-weight: 400;
-            color: var(--text);
+            &::placeholder {
+                color: var(--sub);
+                font-size: large;
+                font-weight: 400;
+            }
         }
     }
 
-    .right {
-        width: 30%;
-        h2 {
-            color: var(--text);
-            @include font-custom(22px, 500);
+    .info {
+        @include flex-center;
+        gap: 1rem;
+
+        .gameLiveTime {
+            @include flex-center-col;
+            border: 4px solid var(--highlight);
+            background: var(--text);
+            border-radius: 50%;
+            padding: 1rem;
+            h2 {
+                color: var(--sub);
+                font-size: 20px;
+                font-weight: 500;
+            }
+            span {
+                color: var(--main);
+                font-size: 20px;
+                font-weight: 500;
+            }
         }
-        span {
-            color: var(--main);
-            @include font-custom(27px, 600);
+        .box {
+            @include flex-center-col;
+            background: var(--text);
+            border-radius: 6px;
+            padding: 6px 1rem;
+            h2 {
+                color: var(--sub);
+                @include font-custom(22px, 500);
+                font-size: 22px;
+                font-weight: 500;
+            }
+            span {
+                color: var(--main);
+                font-size: 22px;
+                font-weight: 500;
+            }
         }
     }
 
@@ -721,6 +858,40 @@ async function addParagraph() {
         visibility: visible;
         opacity: 1;
     }
+
+    .caps_locked {
+        background: var(--highlight);
+        color: var(--bg);
+        padding: 4px 8px;
+        border-radius: 6px;
+
+        position: absolute;
+        left: 50%;
+        top: 10%;
+        @include wh-max;
+        @include flex-center;
+        font-size: 20px;
+        font-weight: 600;
+        z-index: 2000;
+
+        transition: all var(--hover-trans);
+        visibility: hidden;
+        opacity: 0;
+    }
+    &.caps_lock_active .caps_locked {
+        visibility: visible;
+        opacity: 1;
+    }
 }
 /* Writer Box End */
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
 </style>

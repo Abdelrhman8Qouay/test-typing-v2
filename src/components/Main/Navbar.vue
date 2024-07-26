@@ -3,9 +3,6 @@
     <nav class="navbar">
         <div class="container">
             <div class="left">
-                <div class="logo">
-                    <img src="@/assets/logo.svg" alt="logo page" />
-                </div>
                 <!-- Navbar Content -->
                 <div class="nav-above gap-2 p-2">
                     <RouterLink :class="{ active: $route.path === '/' }" to="/" @click="openTab = false"><Icon icon="mdi:keyboard-variant" /></RouterLink>
@@ -16,7 +13,7 @@
             <div class="right">
                 <div class="relative" tabindex="0">
                     <span class="flex justify-center items-center opt" @click.self="open_color_mode_menu = !open_color_mode_menu" :class="open_color_mode_menu ? '!text-[var(--highlight)]' : ''">
-                        <Icon icon="mdi:theme-light-dark" class="mx-1 inline-block" />
+                        <Icon icon="unjs:theme-colors" class="mx-1 inline-block" />
                         {{ compo_game_setting.theme.theme.as }}</span
                     >
                     <ul

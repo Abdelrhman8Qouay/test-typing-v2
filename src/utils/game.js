@@ -31,7 +31,6 @@ export function isCapsLockActive(ev /* event from keydown on document */) {
 // scroll the container to active letter
 export function scrollToActiveLetter(paraContainerEle) {
     const activeLetter = paraContainerEle.querySelector('.letter-active')
-    console.log('scroll here')
 
     if (activeLetter) {
         // Calculate the position to scroll to

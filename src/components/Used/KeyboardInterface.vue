@@ -525,10 +525,11 @@ function getKeyCode(char) {
         padding: 15px 15px 10px;
     }
 
-    .keyboard--a,
-    .keyboard--detail {
-        background-color: var(--sub);
-    }
+    // ----------- background of keyboard -----------
+    // .keyboard--a,
+    // .keyboard--detail {
+    //     background-color: var(--sub);
+    // }
 
     .keyboard {
         box-sizing: border-box;

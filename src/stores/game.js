@@ -5,7 +5,6 @@ import { getImageUrl, hasClass } from '../utils'
 
 export const useGameStore = defineStore('game', () => {
     // ========== behavior sys
-    // const testDifficulty = ref('normal')
     // const quickRestart = ref('esc')
     // // ========== input sys
     // const freedomMode = ref('off')
@@ -13,27 +12,28 @@ export const useGameStore = defineStore('game', () => {
     // const confidenceMode = ref('off')
     // const lazyMode = ref('off')
     // // ========== sound sys
-    const soundVolume = ref(0.5) // quiet >> 0.2 | medium >> 0.5 | loud >> 0.9
-    const soundOnClick = ref(getImageUrl('assets/sound/clicks/click.mp3'))
-    const soundOnError = ref(getImageUrl('assets/sound/errors/err_click.wav'))
+    const soundVolume = ref(0.5) // default value
+    const soundOnClick = ref(getImageUrl('assets/sound/clicks/click.mp3')) // default value
+    const soundOnError = ref(getImageUrl('assets/sound/errors/modern_checker.wav')) // default value
 
     // ========== Appearance sys
-    const per = ref({
-        type: 'wpm',
-        value: 0
+    // --------- game info & user info
+    const userInfo = ref({
+        are: 'turtle',
+        accuracy: 0,
+        per: {
+            type: 'wpm',
+            value: 0
+        },
+        time: 0,
+        correct: 0,
+        total: 0
     })
     // const fontSize = ref(2)
-    // const fontName = ref('Lato')
 
     // // ========== theme sys
     // const flipTestColors = ref('off')
     // const colorfulMode = ref('off')
-    // const currTheme = ref('superuser')
-    // // ========== hide elements sys
-    // const outOfFocusWarning = ref('show')
-    // const capsLockWarning = ref('show')
-
-    // ========== danger zone sys
 
     return {
         // testDifficulty,
@@ -49,7 +49,7 @@ export const useGameStore = defineStore('game', () => {
         soundOnError,
         // // ----------
         // show_keyboard,
-        per
+        userInfo
         // fontName,
         // fontSize,
         // // ----------
