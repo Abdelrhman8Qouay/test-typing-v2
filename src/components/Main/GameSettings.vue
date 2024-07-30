@@ -1,5 +1,5 @@
 <template>
-    <div class="gameSettings p-2 rounded-lg h-max w-full">
+    <div class="gameSettings h-max w-full">
         <h2 class="text-3xl font-semibold">Take a Free Typing Test</h2>
         <span class="text-[var(--text)] font-bold">It’s never been easier to check your Words Per Minute (WPM) score</span>
         <p class="text-md font-extralight mt-4">
@@ -11,15 +11,15 @@
         </p>
 
         <div class="set flex flex-col gap-4 mt-4">
-            <div class="row flex items-center gap-3 bg-[var(--bg)] px-10 p-5" v-for="(row, i) in Object.keys(settingStore.setting_of_paras)" :key="i">
-                <h2 class="text-[var(--highlight)] text-2xl font-bold">{{ capitalizeFirstChar(row) }} test</h2>
+            <div class="row flex items-center gap-3 bg-[var(--bg)] px-10 p-5" v-for="(type, i) in Object.keys(settingStore.setting_of_paras)" :key="i">
+                <h2 class="text-[var(--highlight)] text-2xl font-bold">{{ capitalizeFirstChar(type) }} test</h2>
                 <div class="subSet flex justify-around gap-2 flex-1">
-                    <div class="col relative" v-for="(col, i) in settingStore.setting_of_paras[row].set" @click="settingStore.liveGameSetting(val, 'setting')" :key="i">
+                    <div class="col relative" v-for="(set, j) in settingStore.setting_of_paras[type].set" :key="j">
                         <div class="bg-[var(--highligh)] w-full flex justify-center">
-                            <div class="bg-[var(--sub)] rounded-full py-1"><Icon :icon="settingStore.setting_of_paras[row].icon" /></div>
+                            <div class="bg-[var(--sub)] rounded-full py-1"><Icon :icon="settingStore.setting_of_paras[type].icon" /></div>
                         </div>
-                        <div>{{ col }} Test</div>
-                        <Button class="!bg-[var(--main)] !text-[var(--bg)] w-max" @click.prevent="openGame(row, col)" :is-button="true" txt="Typing test" ico="ic:sharp-arrow-right" :ico-size="22" />
+                        <div>{{ set }} Test</div>
+                        <Button class="!bg-[var(--main)] !text-[var(--bg)] w-max" @click.prevent="openGame(type, set)" :is-button="true" txt="Typing test" ico="ic:sharp-arrow-right" :ico-size="22" />
                     </div>
                 </div>
             </div>
@@ -34,15 +34,13 @@ import { Icon } from '@iconify/vue'
 import Button from '@/components/Used/Button.vue'
 
 // ===================== Stores =====================
-import { storeToRefs } from 'pinia'
 import { useGameStore, useSettingStore } from '@/stores'
 import { capitalizeFirstChar } from '@/utils'
 const settingStore = useSettingStore()
 
-function openGame(row, setting) {
-    settingStore.game_state.type = row
+function openGame(type, setting) {
+    settingStore.game_state.type = type
     settingStore.game_state.setting = setting
-    settingStore.curr_game_state = setting
 }
 </script>
 
@@ -51,7 +49,6 @@ function openGame(row, setting) {
 
 .gameSettings {
     z-index: 10000;
-    background: var(--sub);
     color: var(--highlight);
 
     .col {
@@ -59,6 +56,7 @@ function openGame(row, setting) {
         background: var(--sub);
         border-radius: 6px;
         padding: 6px 1rem;
+
         h2 {
             color: var(--sub);
             @include font-custom(22px, 500);
@@ -70,7 +68,6 @@ function openGame(row, setting) {
             font-size: 22px;
             font-weight: 500;
         }
-        cursor: pointer;
         .tag {
             color: var(--text);
             user-select: none;

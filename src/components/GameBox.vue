@@ -4,9 +4,26 @@
         <!-- Ready Page  -->
         <transition name="fade" appear>
             <div v-if="showBoard" class="board_box w-full h-full flex gap-5 flex-col mt-5">
-                <div class="w-full h-16 bg-[var(--sub)] rounded-lg"></div>
-                <div class="flex justify-center items-center">
+                <div v-if="userInfo.per.value" class="w-full h-16 bg-[var(--sub)] rounded-lg flex flex-col justify-center items-start p-2">
+                    <Button
+                        class="!bg-[var(--main)] !text-[var(--bg)] w-max"
+                        @click.prevent="showModal = true"
+                        :is-button="true"
+                        txt="Show Information"
+                        ico="material-symbols-light:chat-info-outline-rounded"
+                        :ico-size="22"
+                    />
+                    <span class="text-[var(--highlight)]">Open the { Information modal } for the last game.</span>
+                </div>
+                <div class="bg-[var(--sub)] flex justify-center items-center p-2 rounded-lg">
                     <GameSettings />
+                </div>
+
+                <div class="bg-[var(--sub)] flex flex-col gap-2 p-2 rounded-lg">
+                    <h2 class="text-3xl text-[var(--highlight)] font-semibold">FAQs</h2>
+                    <settingDropper :def-open="false" class="bg-[var(--bg)]" v-for="(set, i) in faqs" :key="i" :tit="set.tit">
+                        <p class="text-md text-[var(--main)] font-extralight mt-2 m-4" v-html="set.par"></p>
+                    </settingDropper>
                 </div>
             </div>
         </transition>
@@ -17,25 +34,57 @@
                 <LeavesAnimate />
 
                 <div class="writerBox" ref="writerBoxEle">
-                    <div class="info">
-                        <div class="box">
-                            <h2>{{ userInfo.per.type }}</h2>
-                            <span id="wpmLive" ref="wpmLiveTimeEle">{{ userInfo.per.value }}</span>
+                    <div class="info flex flex-col gap-2">
+                        <div class="top flex gap-2">
+                            <div class="box">
+                                <h2>{{ userInfo.per.type }}</h2>
+                                <span id="wpmLive" ref="wpmLiveTimeEle">{{ userInfo.per.value }}</span>
+                            </div>
+                            <div class="box">
+                                <h2>acc</h2>
+                                <span id="accuracyLive" ref="accLiveTimeEle">{{ userInfo.accuracy }} %</span>
+                            </div>
+                            <div class="gameLiveTime text-[var(--highlight)]" ref="gameLiveTimeEle">
+                                <h2>{{ game_is_timer ? timeSpent : game_timeout }}</h2>
+                                <span id="accuracyLive" ref="accLiveTimeEle">Seconds</span>
+                            </div>
                         </div>
-                        <div class="box">
-                            <h2>acc</h2>
-                            <span id="accuracyLive" ref="accLiveTimeEle">{{ accuracy }} %</span>
-                        </div>
-                        <div class="gameLiveTime text-[var(--highlight)]" ref="gameLiveTimeEle">
-                            <h2>{{ game_timeout }}</h2>
-                            <span id="accuracyLive" ref="accLiveTimeEle">Seconds</span>
+
+                        <div class="down flex gap-2">
+                            <div
+                                class="card bg-[var(--highlight)] px-3 p-1 h-max flex flex-col gap-1 justify-center items-center"
+                                v-for="(it, i) in [
+                                    {
+                                        head: 'Total',
+                                        val: total_letters_record || 0
+                                    },
+                                    {
+                                        head: 'Correct',
+                                        val: correct_letters_record || 0
+                                    },
+                                    {
+                                        head: 'Words',
+                                        val: words_done || 0
+                                    }
+                                ]"
+                                :key="i"
+                            >
+                                <h2 class="text-[var(--bg)] text-base font-medium">{{ it.head }}</h2>
+                                <span class="text-black text-lg font-bold">{{ it.val }}</span>
+                                <div class="w-[1px] h-full bg-[var(--bg)]"></div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="game">
-                        <div class="para_container" ref="paraContainerEle" @click="focusInput(typeInput)" v-html="paraContainer"></div>
+                        <!-- Para Container -->
+                        <div class="para_container" ref="paraContainerEle" @click="focusInput(inputWriter)">
+                            <span v-for="(letter, i) in para_content_text" :key="i" class="letter" :data-char="letter">{{ letter }}</span>
+                        </div>
+
+                        <!-- User Input Typing -->
                         <input
-                            ref="typeInput"
+                            ref="inputWriter"
                             id="userInput"
                             type="text"
                             name="front"
@@ -46,12 +95,12 @@
                             autocomplete="off"
                         />
                     </div>
-
+                    <!-- Out Of Focus -->
                     <div class="out_of_focus" ref="outOfFocusEle">
                         <div><Icon icon="mdi:cursor-default" /></div>
                         <span>Out of focus, go to the game</span>
                     </div>
-
+                    <!-- Caps Lock  -->
                     <div class="caps_locked" ref="capsLockedEle">
                         <div><Icon icon="ic:baseline-lock" /></div>
                         <span>Caps Lock</span>
@@ -64,42 +113,76 @@
 
         <!-- Info Modal -->
         <transition name="fade">
-            <div v-if="showModal" class="modal bg-[#0000009a] flex justify-center items-center fixed left-0 top-0 w-screen h-screen z-[12000]">
+            <div v-if="showModal" class="modal bg-[#0000009a] flex justify-center items-center fixed left-0 top-0 w-screen h-screen z-[12000]" @click.self="showModal = false">
                 <!-- Close Button -->
                 <div class="text-[var(--highlight)] text-4xl absolute left-10 top-10 cursor-pointer" @click="showModal = false"><Icon icon="ei:close" /></div>
+
                 <!-- Box Of Modal -->
-                <div class="box w-max h-max bg-[var(--bg)] rounded-lg p-4">
+                <div class="box w-max h-max p-4 bg-[url(@/assets/images/task_done.jpg)] bg-no-repeat bg-cover [background-position:bottom] border-4 border-[var(--highlight)] rounded-lg relative">
+                    <!-- Cover Shadow On Box -->
+                    <div class="opac backdrop-blur-sm absolute left-0 top-0 bg-[#0000009a] z-0 w-full h-full rounded-lg"></div>
+
                     <!-- Content here... -->
-                    <div class="flex justify-around">
-                        <div class="box">
-                            <h2>{{ userInfo.per.type.toUpperCase() }}</h2>
-                            <span id="wpm" ref="wpmEle">{{ userInfo.per.value }}</span>
+                    <div class="containing flex gap-3">
+                        <div class="imagine w-[25vw] z-10">
+                            <!-- <img class="w-full h-full object-contain" src="@/assets/images/china_morning.jpg" alt="Imagine Yourself" /> -->
+                            <Icon :icon="userInfo.are.icon" class="w-full h-full" :color="getCssColorVar('--highlight')" />
                         </div>
-                        <div class="box">
-                            <h2>Accuracy</h2>
-                            <span id="accuracy" ref="accuracyEle">{{ accuracy }} %</span>
+                        <div class="info flex flex-col gap-2 w-[45vw] z-10">
+                            <div class="cards flex gap-3 order-1 p-2">
+                                <div
+                                    class="card bg-[var(--highlight)] px-3 p-1 h-max flex flex-col gap-1 justify-center items-center"
+                                    v-for="(it, i) in [
+                                        {
+                                            head: 'time',
+                                            val: game_is_timer ? timeSpent : game_timeout + ' sec' || 0 + ' sec'
+                                        },
+                                        {
+                                            head: 'total',
+                                            val: total_letters_record || 0
+                                        },
+                                        {
+                                            head: 'correct',
+                                            val: correct_letters_record || 0
+                                        },
+                                        {
+                                            head: 'words',
+                                            val: words_done || 0
+                                        }
+                                    ]"
+                                    :key="i"
+                                >
+                                    <h2 class="text-[var(--bg)] text-base font-medium">{{ it.head }}</h2>
+                                    <span class="text-black text-lg font-bold">{{ it.val }}</span>
+                                    <div class="w-[1px] h-full bg-[var(--bg)]"></div>
+                                </div>
+                                <div
+                                    class="mat flex flex-col gap-1 justify-center items-center"
+                                    v-for="(it, i) in [
+                                        {
+                                            head: userInfo.per.type.toUpperCase(),
+                                            val: userInfo.per.value || 0
+                                        },
+                                        {
+                                            head: 'Accuracy',
+                                            val: userInfo.accuracy + ' %' || 0 + ' %'
+                                        }
+                                    ]"
+                                    :key="i"
+                                >
+                                    <h2 class="text-[var(--highlight)] text-base font-medium">{{ it.head }}</h2>
+                                    <span class="text-[var(--highlight)] text-lg font-bold">{{ it.val }}</span>
+                                    <div class="w-[1px] h-full bg-[var(--highlight)]"></div>
+                                </div>
+                            </div>
+
+                            <div class="w-full h-max">
+                                <p class="text-[var(--highlight)] text-2xl font-light">{{ userInfo.are.msg || 'Some errors in this message!!' }}</p>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="res !justify-around">
-                        <div class="box">
-                            <h2>time</h2>
-                            <span id="time_game_done" ref="gameTimeEle">{{ timeSpent }}</span>
-                        </div>
-                        <div class="flex gap-4">
-                            <div class="box boxFull" title="total characters">
-                                <h2>* /</h2>
-                                <span>{{ total_chars_typed }}</span>
-                            </div>
-                            <div class="box" title="correct characters">
-                                <h2>correct /</h2>
-                                <span>{{ correct_chars }}</span>
-                            </div>
-                            <div class="box" title="words typed">
-                                <h2>words</h2>
-                                <span id="words_num" ref="wordsEle">{{ words_done }}</span>
-                            </div>
-                        </div>
+                    <div class="btn flex justify-center mt-10">
+                        <Button class="!bg-[var(--highlight)] !text-[var(--bg)] w-max" @click.prevent="startGame()" :is-button="true" txt="Try Again" ico="" :ico-size="22" />
                     </div>
                 </div>
             </div>
@@ -110,135 +193,154 @@
 
 <script setup>
 // ============ Import ============
-import { ref, onMounted, computed, watch, nextTick, onUnmounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, computed, watch, nextTick, onBeforeUnmount } from 'vue'
 
 import { Icon } from '@iconify/vue'
 
-import { addClass, removeClass, hasClass, isSpaceChar, focusInput, playAudio, pauseEle, playClick } from '@/utils'
+import { addClass, removeClass, hasClass, isSpaceChar, focusInput, playAudio, pauseEle, playClick, getCssColorVar, fetchData, accCalc } from '@/utils'
 import { calculateTypingMetrics, strToBool, isCapsLockActive, scrollToActiveLetter } from '@/utils'
 
 import GameSettings from '@/components/Main/GameSettings.vue'
 import LeavesAnimate from '@/components/Used/LeavesAnimate.vue'
 import KeyboardInterface from '@/components/Used/KeyboardInterface.vue'
 import Button from '@/components/Used/Button.vue'
+import SettingDropper from '@/components/SettingDropper.vue'
 
-import paras from '@/data/context.json'
 // ===================== Stores =====================
 import { storeToRefs } from 'pinia'
 import { usePublicStore, useGameStore, useSettingStore } from '@/stores'
-const { game_state, curr_game_state, compo_game_setting } = storeToRefs(useSettingStore())
+const { game_state, compo_game_setting } = storeToRefs(useSettingStore())
 const { userInfo, soundVolume, soundOnClick, soundOnError } = storeToRefs(useGameStore())
 
-watch(curr_game_state, async (newVal) => {
+const faqs = [
+    {
+        tit: 'How do I increase my typing speed?',
+        par: 'There are two ways to type faster: The best way to increase typing speed is to learn to type the correct way. “Touch typing” means you are able to type with all 10 fingers instead of using a “hunt and peck” method of typing. You can learn how to touch type with Typing.com’s free typing lessons. The second way you can learn to type faster is by playing typing games. Keyboard games like Nitro Type can help you practice your typing speed and increase your words per minute score.'
+    },
+    {
+        tit: 'How fast should I type?',
+        par: `The ideal typing speeds by age are as follows:<br />
+<br />Elementary school (Grades 3–5): 8–15 WPM
+<br />Middle school (Grades 6–8): 12–25 WPM<br />High school (Grades 9–12): 20–35 WPM<br />College/Adult: 50 WPM`
+    },
+    {
+        tit: 'How is typing speed measured?',
+        par: `Typing speed is measured by the number of words you can type correctly in a set amount of time. A “word” is equivalent to five keystrokes. During a test, both speed and accuracy are measured. You will receive a number that indicates your average words per minute (WPM) and a percentage that indicates your accuracy. When you complete a 1-minute, 3-minute, or 5-minute timed typing test, you will be able to print out a certificate.`
+    },
+    {
+        tit: 'Why is it important to take a typing speed test?',
+        par: `Taking a typing speed test establishes your average typing speed (WPM) and accuracy, which is an important baseline to know so you can increase speed and improve accuracy with practice. Periodically taking typing speed tests can help you track your progress and measure improvement. You even can use your WPM score from the typing test on your resume to highlight your administrative skills!`
+    }
+]
+
+watch(game_state.value, async (newVal) => {
     new nextTick()
-    clickBegin()
+    startGame()
 })
 
 // ===================== Variables =====================
 const paragraphs = ref(null)
 const showBoard = ref(true)
-const showModal = ref(true)
+const showModal = ref(false)
 const backgroundAudio = ref(null)
+const para_api = `https://baconipsum.com/api/?type=all-meat&paras=3`
 
 // ---------------------------- Game variables
 // paragraph variables
-const const_time = ref(curr_game_state.value)
-const game_timeout = ref(const_time.value)
-const random_para = ref(0) // random number with length of paragraphs exists
-const current_para = ref(null) // get random content from data
 const para_content_text = ref(null) // get the content of para
 const splittedContent = ref(null) // split all context to words separate by (space)
 
 // main options when play {typing racer game}
+const const_time = ref(0) // constant time (reference)
 const para_char_num = ref(0) // the total character numbers of paragraph as [index] {access on all chars in para}
-const total_chars_typed = ref(0) // total characters typed {not include spaces}
-const correct_chars = ref(0) // correct characters typed
-const words_done = ref(0) // number of words done correctly
+const total_letters_record = ref(0) // total letters typed {not include spaces}
+const correct_letters_record = ref(0) // correct letters typed
+const words_done = ref(0) // number of words done
 
 const event_key = ref({ code: '' /*Example: KeyE or KeyE the same */, key: '' /*Example: e or E */ })
 const keyboard_char_index = ref(null) // (null) >> that to watch when change to a number
 const game_stop = ref(null) // contains the interval function to control this
 // variables to check something
 const first_type = ref(false)
+const game_is_timer = ref(true)
 // this finally get result
-const accuracy = ref(0)
+const game_timeout = ref(const_time.value)
 const timeSpent = computed(() => const_time.value - game_timeout.value)
+
 // ----------------------------
 // DOM elements
 const writerBoxEle = ref(null) // to control the element
-const paraContainer = ref('') // that to fill the html
 const paraContainerEle = ref(null) // to control the element
 const para_letters = ref(null) // all paragraph characters (one by one)
-const typeInput = ref(null) // {input writer}
+const inputWriter = ref(null) // {input writer}
 
 const outOfFocusEle = ref(null)
 const capsLockedEle = ref(null)
 
 // ===================== Functions =====================
 // when mounted
-onMounted(() => {
-    try {
-        paragraphs.value = paras
-        // clickBegin()
-    } catch (err) {
-        console.log('Mounted Page Error: ' + err)
-    }
-})
+// onMounted(async () => {
+//     // get all paragraphs first
+//     try {
+//         await fetchData(para_api).then((res) => {
+//             paragraphs.value = res
+//             console.log(res)
+//         })
+//     } catch (err) {
+//         console.log('Game Start Error: ' + err)
+//     }
+// })
 
 // before leave the component
 onBeforeUnmount(() => endGame())
 
-// Start the game
-const clickBegin = () => {
-    startGame(paragraphs.value, curr_game_state.value /*const_time*/)
-}
-
 // ===================== Game Functions =====================
 // ------------------ Start & End game ------------------
-function startGame(paras, const_timeout) {
-    // add the options
-    const_time.value = const_timeout
-    game_timeout.value = const_timeout
-    random_para.value = Math.floor(Math.random() * paras.length) // random number with length of paragraphs exists
-    current_para.value = paras[random_para.value] // get random content from data
-    splittedContent.value = current_para.value.para.split(' ')
-    para_content_text.value = paras[random_para.value].para // get the content of the paragraph
+async function startGame() {
+    try {
+        // get all paragraphs first
+        const res = await fetchData(para_api)
+        paragraphs.value = res
+        console.log(res)
 
-    // show game
-    showBoard.value = false
+        // handle all options
+        getHandledPara(paragraphs.value)
 
-    // return to default
-    defaultGameInfo()
+        // then show game
+        showBoard.value = false
+        showModal.value = false
 
-    // then add the paragraph
-    addParagraph()
+        // then return to default
+        defaultGameInfo()
 
-    // to check user focus
-    if (strToBool(compo_game_setting.value['hide elements']['out of focus warning'].as)) {
-        window.addEventListener('click', (e) => UserFocus(e))
+        // then add the paragraph
+        addParagraph()
+
+        // to check user focus
+        if (strToBool(compo_game_setting.value['hide elements']['out of focus warning'].as)) {
+            window.addEventListener('click', (e) => UserFocus(e))
+        }
+
+        // to check Caps Lock
+        if (strToBool(compo_game_setting.value['hide elements']['caps lock warning'].as)) {
+            document.addEventListener('keydown', (e) => CapsLockWarn(e))
+        }
+
+        // play background audio
+        // backgroundAudio.value = new Audio(getImageUrl(current_para.value.audio))
+        // console.log(getImageUrl(current_para.value.audio))
+        // playAudio(backgroundAudio.value, true)
+    } catch (err) {
+        console.log('Game Start Error: ' + err)
     }
-
-    // to check Caps Lock
-    if (strToBool(compo_game_setting.value['hide elements']['caps lock warning'].as)) {
-        document.addEventListener('keydown', (e) => CapsLockWarn(e))
-    }
-
-    // play background audio
-    // backgroundAudio.value = new Audio(getImageUrl(current_para.value.audio))
-    // console.log(getImageUrl(current_para.value.audio))
-    // playAudio(backgroundAudio.value, true)
 }
 // ending the game
 function endGame() {
+    // stop game interval
     clearInterval(game_stop.value)
 
     // put the result of the last game
     setUserInfo()
-
-    // pause background audio
-    if (backgroundAudio.value) {
-        pauseEle(backgroundAudio.value)
-    }
 
     // remove the event listener
     if (strToBool(compo_game_setting.value['hide elements']['out of focus warning'].as)) {
@@ -257,20 +359,52 @@ function endGame() {
     showModal.value = true
 }
 
+function getHandledPara(paras) {
+    // random number with length of paragraphs exists
+    const randomParaIndex = Math.floor(Math.random() * paras.length)
+    const valueSetPlaced = game_state.value.setting
+
+    // (return to default) (get the content of the paragraph)
+    const wordsArray = paras[randomParaIndex].split(' ') || []
+    splittedContent.value = []
+    para_content_text.value = ''
+    game_timeout.value = 0
+
+    // check (setting type) of the game
+    if (game_state.value.type == 'quote' || game_state.value.type == 'words') {
+        // stop timer operation
+        game_is_timer.value = false
+        game_timeout.value = 0
+        const_time.value = 0
+        // to get words until (numberOfWords)
+        let numberOfWords = game_state.value.type == 'quote' ? useSettingStore().setting_of_paras.quote.got[valueSetPlaced] : valueSetPlaced
+        splittedContent.value = wordsArray.slice(0, numberOfWords)
+    } else {
+        // enter timer operation
+        game_is_timer.value = true
+        game_timeout.value = valueSetPlaced
+        const_time.value = valueSetPlaced
+        // without any slice for the words
+        splittedContent.value = wordsArray
+    }
+    para_content_text.value = splittedContent.value.join(' ') || ''
+}
+
 // ------------------ While Typing ------------------
 // this process while typing in the game
 function typing(e) {
+    const letter_index = para_char_num.value,
+        input_char_index = e.target.value.length
+
     // if this char is first (add start_char) else (remove start_char)
-    if (para_char_num.value > 0) {
-        removeClass(para_letters.value[para_char_num.value], 'start_char')
+    if (letter_index > 0) {
+        removeClass(para_letters.value[letter_index], 'start_char')
     } else {
-        addClass(para_letters.value[para_char_num.value], 'start_char')
+        addClass(para_letters.value[letter_index], 'start_char')
     }
 
-    // the default variables when click (then use it)
-    let input_char_index = e.target.value.length
     // for first time typing
-    if (!first_type.value) checkGameTime()
+    if (!first_type.value) checkGameTime(game_is_timer.value)
     first_type.value = true
 
     // Process this key
@@ -278,20 +412,23 @@ function typing(e) {
         // if pressed space
         spacePressed(e, input_char_index)
     } else if (event_key.value.code == 'Backspace') {
-        // if delete key pressed (go back if not first char in a word)
+        // if delete key pressed (go back if not first letter in a word)
         backPressed(e, input_char_index)
     } else {
         // else {that meaning normal key pressed
         normalPressed(e, input_char_index)
     }
 
-    console.log('correct: ' + correct_chars.value + ' total: ' + total_chars_typed.value)
+    if (game_is_timer.value) {
+        userInfo.value.per.value = calculateTypingMetrics(letter_index, timeSpent.value)[userInfo.value.per.type]
+    } else userInfo.value.per.value = calculateTypingMetrics(letter_index, game_timeout.value)[userInfo.value.per.type]
+    userInfo.value.accuracy = accCalc(correct_letters_record.value, total_letters_record.value)
 
-    userInfo.value.per.value = calculateTypingMetrics(para_char_num.value, timeSpent.value)[userInfo.value.per.type]
-    accuracy.value = accCalc()
+    console.log('curr_letter_Index: ' + para_char_num.value + ' words: ' + words_done.value + ' para_content_text: ' + para_content_text.value.length)
 }
+
 function spacePressed(e, input_char_index) {
-    let inputEle = e.target
+    const inputEle = e.target
     // if input Empty >> stop add new char for {input writer}
     if (!input_char_index) {
         if (hasClass(inputEle, 'error')) {
@@ -324,18 +461,19 @@ function spacePressed(e, input_char_index) {
             words_done.value++
 
             // if ended the paragraph >> endGame
-            if (words_done.value > splittedContent.value.length) {
+            if (words_done.value > splittedContent.value.length - 1 || para_char_num.value == para_content_text.value.length - 1) {
                 endGame()
                 return
             }
 
-            removeClass(para_letters.value[para_char_num.value], 'letter-active') // remove active for space char
-            // from space char to first char in new word
+            // remove active for space letter
+            removeClass(para_letters.value[para_char_num.value], 'letter-active')
+            // from space letter to first letter in new word
             para_char_num.value++
-            // add active for new char
+            // add active for new letter
             addClass(para_letters.value[para_char_num.value], 'letter-active')
 
-            // activeKeyboardKey() // add active for new char on keyboard
+            // activeKeyboardKey() // add active for new letter on keyboard
             keyboard_char_index.value = para_char_num.value
 
             inputEle.value = ''
@@ -344,7 +482,7 @@ function spacePressed(e, input_char_index) {
     }
 }
 function backPressed(e, input_char_index) {
-    let inputEle = e.target
+    const inputEle = e.target
     if (input_char_index < 0) {
         // if {input writer} Empty >>> do nothing
         if (hasClass(inputEle, 'error')) {
@@ -354,14 +492,14 @@ function backPressed(e, input_char_index) {
     } else if (input_char_index >= 0 && !isSpaceChar(splittedContent.value[words_done.value][input_char_index - 1])) {
         // if the previous letter hasClass done >> correct_chars--
         if (hasClass(para_letters.value[para_char_num.value - 1], 'done')) {
-            correct_chars.value--
+            correct_letters_record.value--
         }
 
         // go back by classes
         letterBack(para_char_num.value, para_char_num.value - 1)
         // decrease the char_num
         para_char_num.value--
-        total_chars_typed.value--
+        total_letters_record.value--
 
         // remove {error input} if input true || input empty
         if (splittedContent.value[words_done.value].includes(inputEle.value) || !inputEle.value) {
@@ -388,7 +526,7 @@ function backPressed(e, input_char_index) {
     }
 }
 function normalPressed(e, input_char_index) {
-    let inputEle = e.target
+    const inputEle = e.target
     // if input[char] == content[char]
     if (inputEle.value[input_char_index - 1] == splittedContent.value[words_done.value][input_char_index - 1]) {
         // before move to the next
@@ -397,30 +535,31 @@ function normalPressed(e, input_char_index) {
 
         // then go next
         para_char_num.value++
-        total_chars_typed.value++
-        correct_chars.value++
+        total_letters_record.value++
+        correct_letters_record.value++
         if (hasClass(inputEle, 'error')) {
             removeClass(inputEle, 'error')
         }
 
         // if (last character) >>> endGame
-        if (para_char_num.value > para_content_text.value.length) {
+        if (para_char_num.value == para_content_text.value.length) {
+            words_done.value++
             endGame()
             return
         }
 
-        // else {that is meaning this char is incorrect}
+        // else {that is meaning this letter is incorrect}
     } else {
         // if incorrect stop (on) >>>
         let incStop = compo_game_setting.value['behavior']['incorrect stop'].as
         if (strToBool(incStop)) {
             // if the letter before last exists >>>
             if (para_letters.value[para_char_num.value - 1]) {
-                // if before last has error >>> stop add new char for {input type}
+                // if before last has error >>> stop add new letter for {input type}
                 if (hasClass(para_letters.value[para_char_num.value - 1], 'error')) {
                     clickError(null, null, true) //open audio error only
-                    inputEle.value = inputEle.value.slice(0, input_char_index - 1) // stop add new char for {input type}
-                    // else >>> make error on this char
+                    inputEle.value = inputEle.value.slice(0, input_char_index - 1) // stop add new letter for {input type}
+                    // else >>> make error on this letter
                 } else {
                     continueErr()
                 }
@@ -439,7 +578,7 @@ function normalPressed(e, input_char_index) {
 
             // then go next
             para_char_num.value++
-            total_chars_typed.value++
+            total_letters_record.value++
         }
 
         // if master (user) >>> endGame
@@ -453,25 +592,26 @@ function normalPressed(e, input_char_index) {
 
 // --------------- Process the game info ---------------
 // game interval to check the game live time second by second
-function checkGameTime() {
-    game_stop.value = setInterval(() => {
-        // info changed
-        gameLiveTime.value = --game_timeout.value
-        userInfo.value.time = gameLiveTime.value
-        userInfo.value.per.value = calculateTypingMetrics(para_char_num.value, timeSpent.value)[userInfo.value.per.type]
+function checkGameTime(isTimer) {
+    if (isTimer) {
+        game_stop.value = setInterval(() => {
+            // info changed
+            game_timeout.value--
+            userInfo.value.per.value = calculateTypingMetrics(para_char_num.value, timeSpent.value)[userInfo.value.per.type]
 
-        // if the time is 0 >>> endGame
-        if (game_timeout.value <= 0) {
-            clearInterval(game_stop.value)
-            return endGame()
-        }
-    }, 1000)
-}
-
-// accuracy calculation (return the percentage of the user typing accuracy)
-function accCalc() {
-    let accuracy = (correct_chars.value / total_chars_typed.value) * 100 // (correctCharactersTyped / totalCharactersTyped) * 100;
-    return Math.floor(accuracy) || 0
+            // if the time is 0 >>> endGame
+            if (game_timeout.value <= 0) {
+                clearInterval(game_stop.value)
+                return endGame()
+            }
+        }, 1000)
+    } else {
+        game_stop.value = setInterval(() => {
+            // info changed
+            game_timeout.value++
+            userInfo.value.per.value = calculateTypingMetrics(para_char_num.value, game_timeout.value)[userInfo.value.per.type]
+        }, 1000)
+    }
 }
 
 // --------------- Activate animations for the paragraph ---------------
@@ -482,9 +622,10 @@ function keyActivated(e) {
 }
 
 function UserFocus(e) {
+    if (!e.target || !writerBoxEle.value || !outOfFocusEle.value || !paraContainerEle.value || !inputWriter.value) return
     let curr = e.target
-    if (curr == typeInput.value || curr == paraContainerEle.value || curr == outOfFocusEle.value) {
-        focusInput(typeInput.value)
+    if (curr == inputWriter.value || curr == paraContainerEle.value || curr == outOfFocusEle.value) {
+        focusInput(inputWriter.value)
         if (hasClass(writerBoxEle.value, 'out_of_focus')) removeClass(writerBoxEle.value, 'out_of_focus')
     } else {
         if (!hasClass(writerBoxEle.value, 'out_of_focus')) addClass(writerBoxEle.value, 'out_of_focus')
@@ -492,6 +633,7 @@ function UserFocus(e) {
 }
 
 function CapsLockWarn(e) {
+    if (!e.target || !writerBoxEle.value || !outOfFocusEle.value || !paraContainerEle.value || !inputWriter.value) return
     if (isCapsLockActive(e)) {
         if (!hasClass(writerBoxEle.value, 'caps_lock_active')) addClass(writerBoxEle.value, 'caps_lock_active')
     } else {
@@ -500,54 +642,52 @@ function CapsLockWarn(e) {
 }
 
 // activate the letter in the paragraph
-function letterActive(char_index, char_status) {
+function letterActive(char_index, char_status /* 'done' or 'error' */) {
     if (char_index < 0) return
-    if (char_status == 'done') {
-        addClass(para_letters.value[char_index], 'done')
-        removeClass(para_letters.value[char_index], 'letter-active')
-        if (para_letters.value[char_index + 1]) {
-            addClass(para_letters.value[char_index + 1], 'letter-active')
-            keyboard_char_index.value = char_index + 1 // activeKeyboardKey(char_index + 1, gameObj)
-        }
-    } else if (char_status == 'error') {
-        addClass(para_letters.value[char_index], 'error')
-        removeClass(para_letters.value[char_index], 'letter-active')
-        if (para_letters.value[char_index + 1]) {
-            addClass(para_letters.value[char_index + 1], 'letter-active')
-            keyboard_char_index.value = char_index + 1 // activeKeyboardKey(char_index + 1, gameObj)
-        }
+    const curr_letter = para_letters.value[char_index],
+        curr_plus_letter = para_letters.value[char_index + 1]
+
+    // add current status for the current letter
+    addClass(curr_letter, char_status)
+
+    // add next letter active
+    removeClass(curr_letter, 'letter-active')
+    if (curr_plus_letter) {
+        addClass(curr_plus_letter, 'letter-active')
+        keyboard_char_index.value = char_index + 1 // activeKeyboardKey(char_index + 1, gameObj)
     }
+
+    // scroll the container to next letter activated
     scrollToActiveLetter(paraContainerEle.value)
 }
 
 // (remove the activation from the current key) (add the activation to the previous key): 1 1 0 >> 1 0 0
-function letterBack(currChar_index, toChar_index) {
-    if (currChar_index < 0 || toChar_index < 0) return
+function letterBack(curr_index, next_index) {
+    if (curr_index < 0 || next_index < 0) return
+    const curr_letter = para_letters.value[curr_index],
+        curr_plus_letter = para_letters.value[curr_index + 1],
+        next_letter = para_letters.value[next_index]
 
-    // remove currentChar active
-    removeClass(para_letters.value[currChar_index], 'letter-active')
+    // remove current letter active
+    removeClass(curr_letter, 'letter-active')
 
-    // check the current
-    if (hasClass(para_letters.value[toChar_index], 'done')) {
-        // if toChar done
-        removeClass(para_letters.value[toChar_index], 'done') // remove toChar done
-        addClass(para_letters.value[toChar_index], 'letter-active') // add toChar active
-        if (para_letters.value[currChar_index + 1]) {
-            if (hasClass(para_letters.value[currChar_index + 1], 'letter-active')) {
-                removeClass(para_letters.value[currChar_index + 1], 'letter-active')
-            }
-        }
-    } else if (hasClass(para_letters.value[toChar_index], 'error')) {
-        // if toChar error
-        removeClass(para_letters.value[toChar_index], 'error') // remove toChar error
-        addClass(para_letters.value[toChar_index], 'letter-active') // add toChar active
-        if (para_letters.value[currChar_index + 1]) {
-            if (hasClass(para_letters.value[currChar_index + 1], 'letter-active')) {
-                removeClass(para_letters.value[currChar_index + 1], 'letter-active')
-            }
+    // check the next letter
+    if (hasClass(next_letter, 'done')) {
+        removeClass(next_letter, 'done') // remove next letter done
+    } else if (hasClass(next_letter, 'error')) {
+        removeClass(next_letter, 'error') // remove next letter error
+    }
+
+    // add next letter active
+    addClass(next_letter, 'letter-active')
+    if (curr_plus_letter) {
+        if (hasClass(curr_plus_letter, 'letter-active')) {
+            removeClass(curr_plus_letter, 'letter-active')
         }
     }
-    keyboard_char_index.value = toChar_index // activeKeyboardKey(toChar_index, gameObj)
+
+    // transfer the keyboard to next active
+    keyboard_char_index.value = next_index // activeKeyboardKey(toChar_index, gameObj)
 }
 
 // (play the error audio sound) (if not audio only >> add the class) for error click press
@@ -557,9 +697,12 @@ function clickError(el, className, audOnly = false) {
 }
 
 // --------------- Info game ---------------
-function defaultGameInfo() {
+async function defaultGameInfo() {
+    // wait until DOMContentEnd
+    await nextTick()
+
+    // all of options and rest to >> default
     paraContainerEle.value.scrollLeft = 0
-    paraContainer.value = ''
 
     let spans = document.querySelectorAll('.writerBox .para_container .letter')
     spans.forEach((s) => {
@@ -568,115 +711,98 @@ function defaultGameInfo() {
     })
 
     if (game_stop.value) clearInterval(game_stop.value)
-    gameLiveTime.value = const_time.value // live Time
-    typeInput.value.value = ''
-    if (hasClass(typeInput.value, 'error')) removeClass(typeInput.value, 'error')
 
-    // to default
+    inputWriter.value.value = ''
+    if (hasClass(inputWriter.value, 'error')) removeClass(inputWriter.value, 'error')
+
     para_char_num.value = 0 // the total character numbers of paragraph as [index] {access on all chars in para}
-    total_chars_typed.value = 0 // total characters typed {not include spaces}
-    correct_chars.value = 0 // correct characters typed
+    total_letters_record.value = 0 // total characters typed {not include spaces}
+    correct_letters_record.value = 0 // correct characters typed
     words_done.value = 0 // number of words done correctly
     event_key.value = { code: '', key: '' }
     first_type.value = false
-    keyboard_char_index.value = 5
+    keyboard_char_index.value = 0
 
     setUserInfo(true)
 }
 
-function setUserInfo(to_default = false) {
-    if (to_default) {
-        userInfo.value.per.value = 0
-        accuracy.value = 0
-        userInfo.value.accuracy = accuracy.value
-        userInfo.value.are = 'turtle'
-        userInfo.value.correct = 0
-        userInfo.value.total = 0
-        userInfo.value.time = 0
-        return
-    }
-    userInfo.value.per.value = calculateTypingMetrics(para_char_num.value, timeSpent.value)[userInfo.value.per.type]
-    accuracy.value = accCalc()
-    userInfo.value.time = timeSpent.value
-    userInfo.value.accuracy = accuracy.value
-    userInfo.value.correct = correct_chars.value
-    userInfo.value.total = total_chars_typed.value
-    const nicknames = [
-        { maxSpeed: 10, nickname: 'sloth', message: 'You are a sloth, take it slow.' },
-        { maxSpeed: 20, nickname: 'turtle', message: 'You are a turtle, steady and sure.' },
-        { maxSpeed: 30, nickname: 'cheetah', message: 'You are a cheetah, blazing fast!' },
-        { maxSpeed: 40, nickname: 'eagle', message: 'You are an eagle, soaring high!' },
-        { maxSpeed: 50, nickname: 'octopus', message: 'You are an octopus, amazing multitasking!' },
-        { maxSpeed: Infinity, nickname: 'lightning', message: 'You are lightning, blazing ahead!' }
-    ]
-    const { nickname, message } = nicknames.find((n) => userInfo.value.per.value <= n.maxSpeed)
-    userInfo.value.are = nickname
-}
-
 async function addParagraph() {
-    // empty paragraph interface then
-    paraContainer.value = ''
-
-    // the first char added
-    paraContainer.value += `<span class="letter letter-active start_char" data-char="${para_content_text.value[0]}">${para_content_text.value[0]}</span>`
+    // // the first char added
     keyboard_char_index.value = 0 //KeyboardI.activeKeyboardKey(0, gameObj)
 
-    // iterate for all chars
-    for (let i = 1; i < para_content_text.value.length; i++) {
-        paraContainer.value += `<span class="letter" data-char="${para_content_text.value[i]}">${para_content_text.value[i]}</span>`
-    }
-
+    // wait until DOMContentEnd
     await nextTick()
 
     // get the letters as variables
     para_letters.value = paraContainerEle.value.querySelectorAll('.game_box .writerBox .para_container .letter')
 }
+
+function setUserInfo(to_default = false) {
+    const nicknames = useGameStore().user_nicknames
+    if (to_default) {
+        userInfo.value.per.value = 0
+        userInfo.value.accuracy = 0
+        userInfo.value.letters.correct = 0
+        userInfo.value.letters.total = 0
+        userInfo.value.letters.words = 0
+        userInfo.value.time = 0
+        console.log(nicknames)
+        fillAre(nicknames[0].nickname, nicknames[0].messages, nicknames[0].icon)
+        return
+    }
+
+    if (game_is_timer.value) {
+        userInfo.value.per.value = calculateTypingMetrics(para_char_num.value, timeSpent.value)[userInfo.value.per.type]
+        userInfo.value.time = timeSpent.value
+    } else {
+        userInfo.value.per.value = calculateTypingMetrics(para_char_num.value, game_timeout.value)[userInfo.value.per.type]
+        userInfo.value.time = game_timeout.value
+    }
+    userInfo.value.accuracy = accCalc(correct_letters_record.value, total_letters_record.value)
+
+    userInfo.value.letters.correct = correct_letters_record.value
+    userInfo.value.letters.total = total_letters_record.value
+    userInfo.value.letters.words = words_done.value
+
+    // handle the user result
+    const result = nicknames.find((n) => userInfo.value.per.value <= n.maxSpeed)
+    if (result) {
+        const { nickname, messages, icon } = result
+        fillAre(nickname, messages, icon)
+    } else {
+        // Handle the case where no matching nickname is found >> (put the first nickname)
+        fillAre(nicknames[0].nickname, nicknames[0].messages, nicknames[0].icon)
+    }
+
+    function fillAre(nick, msg, icon) {
+        userInfo.value.are.name = nick
+        userInfo.value.are.msg = getRandomMessage(msg)
+        userInfo.value.are.icon = icon
+    }
+
+    function getRandomMessage(messages) {
+        const randomIndex = Math.floor(Math.random() * messages.length)
+        return messages[randomIndex]
+    }
+}
 </script>
+
+
 
 
 <style lang="scss">
 @import '../assets/css/mixins';
 
-/* Board Box Start */
-.modal {
-    .res {
-        margin-top: 2.5rem;
-        @include wh-custom(100%, max-content);
-        @include rounded-lg;
-        display: flex;
-        justify-content: space-between;
-
-        .box {
-            @include flex-custom(column, nowrap, space-between, center);
-
-            h2 {
-                color: var(--text);
-                @include font-custom(22px, 500);
-            }
-            span {
-                color: var(--main);
-                @include font-custom(27px, 600);
-            }
-        }
-
-        .boxFull {
-            @include flex-center-col;
-            border-radius: 6px;
-            background: var(--sub);
-            padding: 2px 12px;
-
-            h2 {
-                color: var(--text);
-                @include font-custom(22px, 500);
-            }
-            span {
-                color: var(--main);
-                @include font-custom(27px, 600);
-            }
-        }
-    }
+// Active Transition Move
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.5s ease;
 }
-/* Board Box End */
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
 
 /* Writer Box Start */
 .game_box {
@@ -885,13 +1011,22 @@ async function addParagraph() {
 }
 /* Writer Box End */
 
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.5s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
+// Count Animation
+.counter {
     opacity: 0;
+    transition: opacity 1s ease-in-out;
+    &.animate {
+        animation: count 1s ease forwards;
+    }
+}
+@keyframes count {
+    from {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 </style>

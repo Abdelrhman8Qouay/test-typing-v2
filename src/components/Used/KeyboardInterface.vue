@@ -566,10 +566,11 @@ function getKeyCode(char) {
         //     color: var(--secondary);
         // }
 
-        .key--a {
-            border-bottom: 1px solid #a9a9a9;
-            border-top: 1px solid #fff;
-        }
+        // border y colors
+        // .key--a {
+        //     border-bottom: 1px solid #a9a9a9;
+        //     border-top: 1px solid #fff;
+        // }
 
         .key {
             border-radius: 5px;

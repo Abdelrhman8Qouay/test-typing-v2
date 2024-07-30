@@ -3,11 +3,14 @@
     <nav class="navbar">
         <div class="container">
             <div class="left">
+                <div class="logo w-13 h-max">
+                    <Icon class="w-full h-full" icon="arcticons:keyman" :color="getCssColorVar('--highlight')" />
+                </div>
                 <!-- Navbar Content -->
                 <div class="nav-above gap-2 p-2">
-                    <RouterLink :class="{ active: $route.path === '/' }" to="/" @click="openTab = false"><Icon icon="mdi:keyboard-variant" /></RouterLink>
+                    <RouterLink :class="{ active: $route.path === '/' }" to="/"><Icon icon="mdi:keyboard-variant" /></RouterLink>
                     <a :class="{ active: $route.path === '/about' }" href="https://abdelrhmanqouayportfolio.netlify.app" target="_blank" title="about us"><Icon icon="mdi:information-variant" /></a>
-                    <RouterLink :class="{ active: $route.path === '/setting' }" to="/setting" @click="openTab = false"><Icon icon="mdi:cogs" /></RouterLink>
+                    <RouterLink :class="{ active: $route.path === '/setting' }" to="/setting"><Icon icon="mdi:cogs" /></RouterLink>
                 </div>
             </div>
             <div class="right">
@@ -17,7 +20,7 @@
                         {{ compo_game_setting.theme.theme.as }}</span
                     >
                     <ul
-                        class="absolute top-full right-0 w-[25vw] max-h-[70vh] overflow-y-auto rounded-md m-0 transition-all duration-200 z-[5000] bg-[var(--sub)] shadow shadow-[var(--caret)]"
+                        class="absolute top-full right-0 w-[25vw] max-h-[70vh] overflow-y-auto rounded-md m-0 transition-all duration-200 z-[11000] bg-[var(--sub)] shadow shadow-[var(--caret)]"
                         :class="open_color_mode_menu ? 'visible opacity-100' : 'invisible opacity-0'"
                     >
                         <li
@@ -48,6 +51,7 @@ import { Icon } from '@iconify/vue'
 // ===================== Stores =====================
 import { storeToRefs } from 'pinia'
 import { useSettingStore } from '@/stores'
+import { getCssColorVar } from '@/utils'
 const settingStore = useSettingStore()
 const { compo_game_setting } = storeToRefs(settingStore)
 

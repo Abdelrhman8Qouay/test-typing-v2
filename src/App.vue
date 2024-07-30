@@ -6,6 +6,12 @@
         <main>
             <RouterView />
         </main>
+
+        <div class="w-full h-full flex justify-center items-center p-3 mt-32">
+            <p class="text-[var(--text)]">
+                Created By <a class="text-[var(--highlight)] font-semibold" target="_blank" href="https://abdelrhmanqouayportfolio.netlify.app/"> -Abdelrhman Ashraf- </a> With 💖
+            </p>
+        </div>
     </div>
 </template>
 
@@ -24,6 +30,7 @@ const { compo_game_setting } = storeToRefs(settingStore)
 
 onMounted(() => {
     loadFont(compo_game_setting.value['appearance']['font family'].as)
+    settingStore.toggleMode(settingStore.curr_color_mode)
 })
 </script>
 

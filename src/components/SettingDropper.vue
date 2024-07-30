@@ -19,12 +19,16 @@ import { capitalizeFirstChar } from '@/utils'
 import { Icon } from '@iconify/vue'
 
 const props = defineProps({
-    tit: String
+    tit: String,
+    defOpen: {
+        type: Boolean,
+        default: true
+    }
 })
-const { tit: title } = toRefs(props)
+const { tit: title, defOpen } = toRefs(props)
 
 // ========================== Process ==========================
-const is_open = ref(true)
+const is_open = ref(defOpen.value)
 </script>
 
 <style lang="scss">

@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import { removeClass, addClass, loadFont, playAudio, getImageUrl, playClick } from '@/utils'
 
 export const useSettingStore = defineStore('setting', () => {
-    // All Maps Used ======================================================
+    // =========================== All Maps Used ===========================
     const soundMap = {
         off: '',
         quiet: 0.2,
@@ -22,9 +22,9 @@ export const useSettingStore = defineStore('setting', () => {
         'modern checker': getImageUrl('assets/sound/errors/modern_checker.wav').href
     }
 
-    // For Page Color Mode ======================================================
+    // =========================== For Page Color Mode ===========================
     // current color mode
-    const curr_color_mode = ref('superuser')
+    const curr_color_mode = ref('dev')
     // all color modes
     const color_modes = {
         dark: 'darkMode',
@@ -66,7 +66,7 @@ export const useSettingStore = defineStore('setting', () => {
         addClass(body, color_modes[modeName])
     }
 
-    // For game settings Row ======================================================
+    // =========================== For game settings Row ===========================
     // show all option for each type of the paragraphs
     const setting_of_paras = {
         time: {
@@ -78,7 +78,12 @@ export const useSettingStore = defineStore('setting', () => {
             icon: 'ph:newspaper-light'
         },
         quote: {
-            set: ['short', 'medium', 'long'],
+            set: ['short', 'medium', 'large'],
+            got: {
+                short: 20,
+                medium: 45,
+                large: 80
+            },
             icon: 'lets-icons:paper-light'
         }
     }
@@ -87,23 +92,8 @@ export const useSettingStore = defineStore('setting', () => {
         type: 'time',
         setting: setting_of_paras['time']
     })
-    const curr_game_state = ref(game_state.value.setting[0]) // 15 or 'short' or (one of any from settings)
-    function liveGameSetting(value /* ex: words <string> */, toClick) {
-        if (toClick == 'type') {
-            game_state.value.type = value
-            game_state.value.setting = setting_of_paras[value]
-            curr_game_state.value = game_state.value.setting[0]
-        } else if (toClick == 'setting') {
-            if (value == 'custom') {
-                // do nothing now <<< @@@@@@@@@@@@@@@@@@@
-                curr_game_state.value = value
-            } else {
-                curr_game_state.value = value
-            }
-        }
-    }
 
-    // For game settings Page ======================================================
+    // =========================== For game settings Page ===========================
     /*
         // set is: array set of available choices to use them
         // func is: the function of this setting to use it
@@ -433,8 +423,6 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
         // ----------
         setting_of_paras,
         game_state,
-        curr_game_state,
-        liveGameSetting,
         // ----------
         compo_game_setting
     }

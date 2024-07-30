@@ -64,8 +64,6 @@ watch(compo_game_setting.value, (newVal) => {
     // ========== sound
     gameStore.soundOnClick = settingStore.soundMap[newVal['sound']['play sound on click'].as]
     gameStore.soundOnError = settingStore.soundMap[newVal['sound']['play sound on error'].as]
-
-    console.log(newVal)
 })
 </script>
 
