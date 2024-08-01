@@ -176,8 +176,22 @@ export function accCalc(correct_letters, total_letters) {
     return Math.floor(accuracy) || 0
 }
 
-export function strToBool(str) {
-    return str == 'on' || str == 'show' ? true : false
+export function strToBool(str, restIsTrue = false /* if [off, item, item] {off >> false} or {item >> restIsTrue >> true or false} */) {
+    const map = {
+        show: true,
+        on: true,
+        visible: true,
+        true: true,
+        appear: true,
+        appears: true,
+        invisible: false,
+        hide: false,
+        off: false,
+        false: false,
+        disappear: false,
+        disappears: false
+    }
+    return map[str] || (restIsTrue ? true : false)
 }
 
 // check if the (caps lock) is active or not

@@ -57,10 +57,10 @@ import SettingDropper from '@/components/SettingDropper.vue'
 // ================================= While Watching
 watch(compo_game_setting.value, (newVal) => {
     // ========== appearance
-    gameStore.per.type = newVal['appearance']['typing speed unit'].as
-    gameStore.per.value = 0
+    gameStore.userInfo.per.type = newVal['appearance']['typing speed unit'].as || 'wpm'
+    gameStore.userInfo.per.value = 0
     //---------
-    settingStore.toggleMode(newVal['theme']['theme'].as)
+    settingStore.toggleMode(newVal['theme']['theme'].as || 'dev')
     // ========== sound
     gameStore.soundOnClick = settingStore.soundMap[newVal['sound']['play sound on click'].as]
     gameStore.soundOnError = settingStore.soundMap[newVal['sound']['play sound on error'].as]

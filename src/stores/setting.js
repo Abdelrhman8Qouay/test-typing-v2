@@ -243,7 +243,7 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
                 comment: 'display the keyboard animation',
                 icon: 'ph:keyboard-thin'
             },
-            'keyboard guid': {
+            leaves: {
                 set: ['off', 'on'],
                 def: 'on',
                 as: 'on',
@@ -251,8 +251,8 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
                 func: function (inp) {
                     this.as = inp
                 },
-                comment: 'make the keyboard refer to the keys should press on currently, if not (will refer to pressed key only)',
-                icon: 'ph:keyboard-thin'
+                comment: 'make you see the leaves animation while playing (that leads to a greater sense of comfort)',
+                icon: 'game-icons:three-leaves'
             },
             'typing speed unit': {
                 set: ['wpm', 'cpm', 'wps', 'cps'],
@@ -264,23 +264,6 @@ options disable tab navigation on most parts of the website. Using the "esc" opt
                 },
                 comment: `Display typing speed in the specified unit.`,
                 icon: 'mdi:car-speed-limiter'
-            },
-            'font size': {
-                set: [],
-                def: 2,
-                as: 2,
-                type: 'input',
-                attrs: {
-                    type: 'number',
-                    placeholder: 'set font size number',
-                    min: 1,
-                    max: 10
-                },
-                func: function (inp) {
-                    this.as = inp
-                },
-                comment: `Change the font size of the test words.`,
-                icon: 'mdi:format-size'
             },
             'font family': {
                 set: [
