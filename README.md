@@ -35,12 +35,6 @@ npm install -D tailwindcss@latest postcss@latest autoprefixer@latest
 [install tailwind to the project]
 
 ```sh
-npm install -D tailwindcss@latest postcss@latest autoprefixer@latest
-```
-
-[install tailwind to the project]
-
-```sh
 npx tailwindcss init -p
 ```
 
@@ -58,8 +52,6 @@ npm i aos
 
 [install aos library, that make fade animation with scrolling & loading ( to show doc: https://michalsnik.github.io/aos/ ) ]
 
----
-
 ## Vite Commands Used
 
 ```sh
@@ -68,50 +60,44 @@ npm i vite-plugin-compression -D
 
 [install vite-plugin-compression to compress the site ]
 
-## Install Iconify >> for all icons with various of libs
+### Install Iconify >> for all icons with various of libs
 
-```install
+```sh
 npm install @iconify/vue
 ```
 
-.To use this lib:
-<template>
+[to install and use the icons with vue (iconify)]
 
-  <div>
-    <Icon icon="ic:outline-arrow-right" color="red" height="60" />
-    you can use more of libs with iconify not only (ic)
-  </div>
+```vue
+<template>
+    <div>
+        <Icon icon="ic:outline-arrow-right" color="red" height="60" />
+        you can use more of libs with iconify not only (ic)
+    </div>
 </template>
 
 <script>
 import { Icon } from '@iconify/vue'
 </script>
+```
 
-## Install webfontloader >> for various of fonts used as auto-import
+### Install webfontloader >> for various of fonts used as auto-import
 
-```install
+```sh
 npm install webfontloader
 ```
 
-### To use with STEP BY STEP
+[to install and use it]
 
 1. make the function that is loading the font as auto-import:
    // in 'src/utils/functions.js' js file
    import WebFont from 'webfontloader'
 
-export function loadFont(fontName) {
-WebFont.load({
-google: {
-families: [fontName]
-}
-})
-}
-
-2. use it in the app (use the var of the css to read it):
-   <template>
-    <div :style="'--f-fam: ' + fontName">
-    </div>
-    </template>
+```vue
+export function loadFont(fontName) { WebFont.load({ google: { families: [fontName] } }) } 2. use it in the app (use the var of the css to read it):
+<template>
+    <div :style="'--f-fam: ' + fontName"></div>
+</template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
@@ -134,5 +120,23 @@ function showFont(font) {
 * {
     font-family: var(--f-fam);
 }
-
 </style>
+```
+
+```sh
+npm install diacritics
+```
+
+[To replace accents, diacritics, and special characters with their normal letter equivalents]
+
+```javascript
+import { remove as removeDiacritics } from 'diacritics'
+
+async function replaceSpecialCharacters() {
+    const text = await getParagraph()
+    const normalizedText = removeDiacritics(text)
+    console.log(normalizedText)
+}
+
+replaceSpecialCharacters()
+```

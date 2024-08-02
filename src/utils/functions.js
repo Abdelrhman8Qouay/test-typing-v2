@@ -208,3 +208,10 @@ export function loadFont(fontName) {
         }
     })
 }
+
+import { remove as removeDiacritics } from 'diacritics'
+export function replaceSpecialCharacters(textParagraph) {
+    const normalizedText = removeDiacritics(textParagraph)
+    console.log(normalizedText)
+    return normalizedText
+}

@@ -119,17 +119,6 @@ export const useSettingStore = defineStore('setting', () => {
                     'Normal is the classic type test experience. Expert fails the test if you submit (press space) an incorrect word. Master fails if you press a single incorrect key (meaning you have to achieve 100% accuracy).',
                 icon: 'mdi:star-shooting'
             },
-            'incorrect stop': {
-                set: ['off', 'on'],
-                def: 'on',
-                as: 'on',
-                type: 'many',
-                func: function (inp) {
-                    this.as = inp
-                },
-                comment: 'When make incorrect letter will stop you to make another incorrect letter (Forces the correct letter after incorrect, and so on)',
-                icon: 'game-icons:stop-sign'
-            },
             'quick restart': {
                 set: ['off', 'tab', 'enter', 'esc'],
                 def: 'esc',

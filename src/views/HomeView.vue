@@ -58,15 +58,15 @@
                                         v-for="(it, i) in [
                                             {
                                                 head: 'Total',
-                                                val: total_letters_record || 0
+                                                val: letters_recorded.total || 0
                                             },
                                             {
                                                 head: 'Correct',
-                                                val: correct_letters_record || 0
+                                                val: letters_recorded.correct || 0
                                             },
                                             {
                                                 head: 'Words',
-                                                val: words_done || 0
+                                                val: words_done.correct || 0
                                             }
                                         ]"
                                         :key="i"
@@ -140,15 +140,15 @@
                                                 },
                                                 {
                                                     head: 'total',
-                                                    val: total_letters_record || 0
+                                                    val: letters_recorded.total || 0
                                                 },
                                                 {
                                                     head: 'correct',
-                                                    val: correct_letters_record || 0
+                                                    val: letters_recorded.correct || 0
                                                 },
                                                 {
                                                     head: 'words',
-                                                    val: words_done || 0
+                                                    val: words_done.correct || 0
                                                 }
                                             ]"
                                             :key="i"
@@ -205,12 +205,12 @@
 
 <script setup>
 // ============ Import ============
-import { ref, onMounted, computed, watch, nextTick, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue'
 
 import { Icon } from '@iconify/vue'
 
-import { addClass, removeClass, hasClass, isSpaceChar, focusInput, playAudio, pauseEle, playClick, getCssColorVar, fetchData, accCalc } from '@/utils'
-import { calculateTypingMetrics, strToBool, isCapsLockActive, scrollToActiveLetter } from '@/utils'
+import { addClass, removeClass, hasClass, focusInput, playAudio, pauseEle, playClick, getCssColorVar, fetchData, accCalc, isSpaceChar } from '@/utils'
+import { calculateTypingMetrics, strToBool, isCapsLockActive, scrollToActiveLetter, replaceSpecialCharacters } from '@/utils'
 
 import GameSettings from '@/components/Main/GameSettings.vue'
 import LeavesAnimate from '@/components/Used/LeavesAnimate.vue'
@@ -265,19 +265,26 @@ const splittedContent = ref(null) // split all context to words separate by (spa
 // main options when play {typing racer game}
 const const_time = ref(0) // constant time (reference)
 const para_char_num = ref(0) // the total character numbers of paragraph as [index] {access on all chars in para}
-const total_letters_record = ref(0) // total letters typed {not include spaces}
-const correct_letters_record = ref(0) // correct letters typed
-const words_done = ref(0) // number of words done
 
+// this finally get result
+const letters_recorded = ref({
+    total: 0, // total letters typed {not include spaces}
+    correct: 0 // correct letters typed
+})
+const words_done = ref({
+    words: 0, // number of words done
+    correct: 0 // correct words done
+})
+const game_timeout = ref(const_time.value)
+const timeSpent = computed(() => const_time.value - game_timeout.value)
+
+// depends on
 const event_key = ref({ code: '' /*Example: KeyE or KeyE the same */, key: '' /*Example: e or E */ })
 const keyboard_char_index = ref(null) // (null) >> that to watch when change to a number
 const game_stop = ref(null) // contains the interval function to control this
 // variables to check something
 const first_type = ref(false)
 const game_is_timer = ref(true)
-// this finally get result
-const game_timeout = ref(const_time.value)
-const timeSpent = computed(() => const_time.value - game_timeout.value)
 
 // ----------------------------
 // DOM elements
@@ -380,8 +387,14 @@ function getHandledPara(paras) {
     const randomParaIndex = Math.floor(Math.random() * paras.length)
     const valueSetPlaced = game_state.value.setting
 
+    let curr_para = paras[randomParaIndex]
+    if (strToBool(compo_game_setting.value['when input']['lazy mode'].as)) {
+        console.log('para before >>', curr_para)
+        curr_para = replaceSpecialCharacters(curr_para)
+    }
+
     // (return to default) (get the content of the paragraph)
-    const wordsArray = paras[randomParaIndex].split(' ') || []
+    const wordsArray = curr_para.split(' ') || []
     splittedContent.value = []
     para_content_text.value = ''
     game_timeout.value = 0
@@ -435,18 +448,21 @@ function typing(e) {
         normalPressed(e, input_char_index)
     }
 
+    console.log(words_done.value)
+
     if (game_is_timer.value) {
         userInfo.value.per.value = calculateTypingMetrics(letter_index, timeSpent.value)[userInfo.value.per.type]
     } else userInfo.value.per.value = calculateTypingMetrics(letter_index, game_timeout.value)[userInfo.value.per.type]
-    userInfo.value.accuracy = accCalc(correct_letters_record.value, total_letters_record.value)
+    userInfo.value.accuracy = accCalc(letters_recorded.value.correct, letters_recorded.value.total)
 
-    console.log('curr_letter_Index: ' + para_char_num.value + ' words: ' + words_done.value + ' para_content_text: ' + para_content_text.value.length)
+    console.log('curr_letter_Index: ' + para_char_num.value + ' words: ' + words_done.value.words + ' para_content_text: ' + para_content_text.value.length)
 }
 
 function spacePressed(e, input_char_index) {
     const inputEle = e.target
-    // if input Empty >> stop add new char for {input writer}
-    if (!input_char_index) {
+
+    // if input Empty >> stop add new char for {input writer} | // if input == content[currWord] >>> continue
+    if (inputEle.value.trim().length <= 0) {
         if (hasClass(inputEle, 'error')) {
             removeClass(inputEle, 'error')
         }
@@ -456,21 +472,8 @@ function spacePressed(e, input_char_index) {
 
         // if input not Empty >>
     } else {
-        // // if (stop on error) is word >>> stop continue rest words
-        // const incStop = compo_game_setting.value['behavior']['incorrect stop'].as
-        //     if (diff == 'expert' || diff == 'master') {
-        //         endGame()
-        //         return
-        //     }
-
         // if input not= content[currWords] >>>
-        if (inputEle.value.trim() != splittedContent.value[words_done.value]) {
-            // make error for {input writer}
-            clickError(inputEle, null, true)
-
-            // stop add new char for {input writer}
-            inputEle.value = inputEle.value.slice(0, input_char_index - 1)
-
+        if (inputEle.value.trim() != splittedContent.value[words_done.value.words]) {
             // if expert or master (user) >>> endGame
             const diff = compo_game_setting.value['behavior']['test difficulty'].as
             if (diff == 'expert' || diff == 'master') {
@@ -478,111 +481,164 @@ function spacePressed(e, input_char_index) {
                 return
             }
 
-            // if input == content[currWord] >>> continue
+            // if (stop on error) is word >>> stop continue rest words
+            const incStop = compo_game_setting.value['when input']['stop on error'].as
+            if (incStop == 'word') {
+                // stop add new char for {input writer}
+                inputEle.value = inputEle.value.slice(0, input_char_index - 1)
+            } else {
+                // add words done
+                words_done.value.words++
+
+                makeSpace()
+
+                // process the rest letters of the word that is not processed
+                const prevWord = splittedContent.value[words_done.value.words - 1]
+                const limit_word = para_char_num.value /* current letter index after moved */ - 1 /* space */
+                let prev_first_letter_i = para_char_num.value /* above ^ */ - (prevWord.length + 1) /* wordLength + space */
+                while (prev_first_letter_i < limit_word) {
+                    if (!hasClass(para_letters.value[prev_first_letter_i], 'done') && !hasClass(para_letters.value[prev_first_letter_i], 'error')) {
+                        addClass(para_letters.value[prev_first_letter_i], 'error')
+                        letters_recorded.value.total++
+                    }
+                    prev_first_letter_i++
+                }
+            }
+
+            // make error for {input writer}
+            clickError(inputEle, null, true)
         } else {
             // add words done
-            words_done.value++
+            words_done.value.words++
+            words_done.value.correct++
 
             // if ended the paragraph >> endGame
-            if (words_done.value > splittedContent.value.length - 1 || para_char_num.value == para_content_text.value.length - 1) {
+            if (words_done.value.words > splittedContent.value.length - 1 || para_char_num.value == para_content_text.value.length - 1) {
                 endGame()
                 return
             }
 
-            // remove active for space letter
-            removeClass(para_letters.value[para_char_num.value], 'letter-active')
-            // from space letter to first letter in new word
-            para_char_num.value++
-            // add active for new letter
-            addClass(para_letters.value[para_char_num.value], 'letter-active')
+            makeSpace()
 
-            // activeKeyboardKey() // add active for new letter on keyboard
-            keyboard_char_index.value = para_char_num.value
-
-            inputEle.value = ''
             playClick(soundOnClick.value, soundVolume.value)
         }
     }
+
+    function makeSpace() {
+        // remove active for space letter
+        removeClass(para_letters.value[para_char_num.value], 'letter-active')
+
+        // from space letter to first letter in new word
+        para_char_num.value = para_content_text.value.indexOf(splittedContent.value[words_done.value.words] /*str*/, para_char_num.value /*pos*/)
+
+        // add active for new letter
+        addClass(para_letters.value[para_char_num.value], 'letter-active')
+
+        // activeKeyboardKey() // add active for new letter on keyboard
+        keyboard_char_index.value = para_char_num.value
+
+        inputEle.value = ''
+    }
 }
 function backPressed(e, input_char_index) {
+    if (para_char_num.value <= 0) return
+    // if confidence is max >> you won't be able to backspace at all.
+    if (compo_game_setting.value['when input']['confidence mode'].as == 'max') {
+        checkToRemoveClass()
+        return
+    }
     const inputEle = e.target
-    if (input_char_index < 0) {
-        // if {input writer} Empty >>> do nothing
-        if (hasClass(inputEle, 'error')) {
-            removeClass(inputEle, 'error')
-        }
-        false
-    } else if (input_char_index >= 0 && !isSpaceChar(splittedContent.value[words_done.value][input_char_index - 1])) {
+
+    // if {input writer} Empty & first letter till now exists >>> back letters
+    if (input_char_index >= 0 && (hasClass(para_letters.value[para_char_num.value - 1], 'done') || para_letters.value[para_char_num.value - 1], 'error')) {
         // if the previous letter hasClass done >> correct_chars--
         if (hasClass(para_letters.value[para_char_num.value - 1], 'done')) {
-            correct_letters_record.value--
+            letters_recorded.value.correct--
         }
 
         // go back by classes
         letterBack(para_char_num.value, para_char_num.value - 1)
         // decrease the char_num
         para_char_num.value--
-        total_letters_record.value--
+        letters_recorded.value.total--
 
         // remove {error input} if input true || input empty
-        if (splittedContent.value[words_done.value].includes(inputEle.value) || !inputEle.value) {
-            if (!hasClass(inputEle, 'error')) {
-                removeClass(inputEle, 'error')
-            }
+        if (splittedContent.value[words_done.value.words].includes(inputEle.value) || !inputEle.value) {
+            checkToRemoveClass() // that was !has
         }
 
         // play sound
         playClick(soundOnClick.value, soundVolume.value)
     } else {
+        console.log('(else) for backspace')
         // go back by classes
         letterBack(para_char_num.value /*this current char_index*/, para_char_num.value - 1 /*this old char_index*/)
 
         // remove {error input} if input true || input empty
-        if (splittedContent.value[words_done.value].includes(e.target.value) || !e.target.value) {
-            if (!hasClass(e.target, 'error')) {
-                removeClass(e.target, 'error')
-            }
+        if (splittedContent.value[words_done.value.words].includes(e.target.value) || !inputEle.value) {
+            checkToRemoveClass() // that was !has
         }
 
         // play sound
         playClick(soundOnClick.value, soundVolume.value)
     }
+
+    function checkToRemoveClass() {
+        if (hasClass(inputEle, 'error')) {
+            removeClass(inputEle, 'error')
+        }
+    }
 }
 function normalPressed(e, input_char_index) {
     const inputEle = e.target
-    // if input[char] == content[char]
-    if (inputEle.value[input_char_index - 1] == splittedContent.value[words_done.value][input_char_index - 1]) {
+
+    // if the current letter is space >> do nothing here
+    if (isSpaceChar(para_content_text.value[para_char_num.value])) {
+        // stop add new char for {input writer}
+        inputEle.value = inputEle.value.slice(0, input_char_index - 1)
+        return
+    }
+
+    // if input[letter] == content[letter] >> go next letter | else (incorrect letter) >> (go next) or (stop even fix this)
+    if (inputEle.value[input_char_index - 1] == splittedContent.value[words_done.value.words][input_char_index - 1]) {
         // before move to the next
         letterActive(para_char_num.value, 'done', this)
         playClick(soundOnClick.value, soundVolume.value)
 
         // then go next
         para_char_num.value++
-        total_letters_record.value++
-        correct_letters_record.value++
+        letters_recorded.value.total++
+        letters_recorded.value.correct++
         if (hasClass(inputEle, 'error')) {
             removeClass(inputEle, 'error')
         }
 
-        // if (last character) >>> endGame
+        // if (last letter) >>> endGame
         if (para_char_num.value == para_content_text.value.length) {
-            words_done.value++
+            words_done.value.words++
+            words_done.value.correct++
             endGame()
             return
         }
 
         // else {that is meaning this letter is incorrect}
     } else {
-        // if incorrect stop (on) >>>
-        let incStop = compo_game_setting.value['behavior']['incorrect stop'].as
-        if (strToBool(incStop)) {
+        // if master (user) >>> endGame
+        let diff = compo_game_setting.value['behavior']['test difficulty'].as
+        if (diff == 'master') {
+            endGame()
+            return
+        }
+
+        // if (stop on error) is letter >>> stop continue rest letters
+        const incStop = compo_game_setting.value['when input']['stop on error'].as
+        if (incStop == 'letter') {
             // if the letter before last exists >>>
             if (para_letters.value[para_char_num.value - 1]) {
                 // if before last has error >>> stop add new letter for {input type}
                 if (hasClass(para_letters.value[para_char_num.value - 1], 'error')) {
-                    clickError(null, null, true) //open audio error only
-                    inputEle.value = inputEle.value.slice(0, input_char_index - 1) // stop add new letter for {input type}
-                    // else >>> make error on this letter
+                    // stop add new letter for {input type}
+                    inputEle.value = inputEle.value.slice(0, input_char_index - 1)
                 } else {
                     continueErr()
                 }
@@ -594,6 +650,9 @@ function normalPressed(e, input_char_index) {
             continueErr()
         }
 
+        //open error audio
+        clickError(null, null, true)
+
         function continueErr() {
             // make all operations
             clickError(inputEle, 'error')
@@ -601,15 +660,65 @@ function normalPressed(e, input_char_index) {
 
             // then go next
             para_char_num.value++
-            total_letters_record.value++
+            letters_recorded.value.total++
+        }
+    }
+}
+
+function keyActivated(e) {
+    event_key.value.code = e.code
+    event_key.value.key = e.key
+
+    const inputEle = e.target
+    // go to the previous word (that is not the -1 word because is not exists)
+    if (e.key === 'Backspace' && inputEle.value === '' && para_char_num.value > 0) {
+        e.preventDefault()
+
+        if (hasClass(inputEle, 'error')) {
+            removeClass(inputEle, 'error')
         }
 
-        // if master (user) >>> endGame
-        let diff = compo_game_setting.value['behavior']['test difficulty'].as
-        if (diff == 'master') {
-            endGame()
+        // if confidence is on >> you will not be able to go back to previous words to fix mistakes
+        if (compo_game_setting.value['when input']['confidence mode'].as == 'on') {
             return
         }
+
+        // --------------------- process to go back ---------------------
+        // get the previous word
+        const prevWord = splittedContent.value[words_done.value.words - 1]
+
+        // current letter index after moved  - space
+        const limit_word = para_char_num.value - 1
+        // curr lett ind af mov - (wordLength + space)
+        let prev_first_letter_i = para_char_num.value - (prevWord.length + 1)
+        let correctWord = true
+
+        // iterate through the previous word (stop if last letter) (limit_word >> space index & limit -1 >> last letter)
+        while (prev_first_letter_i < limit_word - 1) {
+            // put content of the word to the input
+            inputEle.value += para_content_text.value[prev_first_letter_i]
+
+            // if any of the letters has an error >> incorrect word
+            if (hasClass(para_letters.value[prev_first_letter_i], 'error')) {
+                correctWord = false
+            }
+
+            prev_first_letter_i++
+        }
+
+        // to the last letter in the prev word
+        letters_recorded.value.total--
+        if (hasClass(para_letters.value[prev_first_letter_i], 'done')) {
+            letters_recorded.value.correct--
+        }
+        words_done.value.words--
+        if (correctWord) {
+            words_done.value.correct--
+        }
+        letterBack(para_char_num.value, prev_first_letter_i)
+        para_char_num.value = prev_first_letter_i
+
+        playClick(soundOnClick.value, soundVolume.value)
     }
 }
 
@@ -639,10 +748,6 @@ function checkGameTime(isTimer) {
 
 // --------------- Activate animations for the paragraph ---------------
 // get the activated key as info(code >> KeyQ, key >> q or Q)
-function keyActivated(e) {
-    event_key.value.code = e.code
-    event_key.value.key = e.key
-}
 
 function UserFocus(e) {
     if (!e.target || !writerBoxEle.value || !outOfFocusEle.value || !paraContainerEle.value || !inputWriter.value) return
@@ -660,7 +765,6 @@ function QuickRestart(e, restart_key) {
     const map = { tab: 'Tab', enter: 'Enter', esc: 'Escape' }
     const curr_key = map[restart_key]
 
-    console.log(e.code, e.key, curr_key)
     if (e.code == curr_key || e.key == curr_key) {
         endGame()
         return
@@ -751,9 +855,10 @@ async function defaultGameInfo() {
     if (hasClass(inputWriter.value, 'error')) removeClass(inputWriter.value, 'error')
 
     para_char_num.value = 0 // the total character numbers of paragraph as [index] {access on all chars in para}
-    total_letters_record.value = 0 // total characters typed {not include spaces}
-    correct_letters_record.value = 0 // correct characters typed
-    words_done.value = 0 // number of words done correctly
+    letters_recorded.value.total = 0 // total characters typed {not include spaces}
+    letters_recorded.value.correct = 0 // correct characters typed
+    words_done.value.words = 0 // number of words done correctly
+    words_done.value.correct = 0 // number of words done correctly
     event_key.value = { code: '', key: '' }
     first_type.value = false
     keyboard_char_index.value = 0
@@ -770,6 +875,7 @@ async function addParagraph() {
 
     // get the letters as variables
     para_letters.value = paraContainerEle.value.querySelectorAll('.game_box .writerBox .para_container .letter')
+    addClass(para_letters.value[0], 'letter-active')
 }
 
 function setUserInfo(to_default = false) {
@@ -781,7 +887,6 @@ function setUserInfo(to_default = false) {
         userInfo.value.letters.total = 0
         userInfo.value.letters.words = 0
         userInfo.value.time = 0
-        console.log(nicknames)
         fillAre(nicknames[0].nickname, nicknames[0].messages, nicknames[0].icon)
         return
     }
@@ -793,11 +898,11 @@ function setUserInfo(to_default = false) {
         userInfo.value.per.value = calculateTypingMetrics(para_char_num.value, game_timeout.value)[userInfo.value.per.type]
         userInfo.value.time = game_timeout.value
     }
-    userInfo.value.accuracy = accCalc(correct_letters_record.value, total_letters_record.value)
+    userInfo.value.accuracy = accCalc(letters_recorded.value.correct, letters_recorded.value.total)
 
-    userInfo.value.letters.correct = correct_letters_record.value
-    userInfo.value.letters.total = total_letters_record.value
-    userInfo.value.letters.words = words_done.value
+    userInfo.value.letters.total = letters_recorded.value.total
+    userInfo.value.letters.correct = letters_recorded.value.correct
+    userInfo.value.letters.words = words_done.value.correct
 
     // handle the user result
     const result = nicknames.find((n) => userInfo.value.per.value <= n.maxSpeed)
@@ -870,9 +975,15 @@ function setUserInfo(to_default = false) {
                 @include padding-custom-lr(1px, 1px);
                 position: relative;
                 &.error {
-                    background: var(--error);
                     color: var(--error-extra);
-                    @include rounded;
+                    &::before {
+                        content: '';
+                        @include wh-custom(112%, 2px);
+                        background: var(--error);
+                        position: absolute;
+                        left: -12%;
+                        top: 91%;
+                    }
                 }
                 &.done {
                     background: var(--highlight);
@@ -880,14 +991,14 @@ function setUserInfo(to_default = false) {
                     @include rounded;
                 }
                 &.letter-active {
-                    color: var(--text);
+                    color: var(--main);
                     &::before {
                         content: '';
                         @include wh-custom(112%, 2px);
                         background: var(--main);
                         position: absolute;
                         left: -12%;
-                        top: 99%;
+                        top: 91%;
                         animation: hideShow 1.5s ease-out infinite;
                     }
                 }
