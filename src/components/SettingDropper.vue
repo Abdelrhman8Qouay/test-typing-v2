@@ -1,11 +1,11 @@
 
 <template>
-    <div class="dropper">
+    <div class="dropper" :id="convertTextSeparator(capitalizeFirstChar(title))">
         <div class="row">
             <h2 @click="is_open = !is_open" class="text-[var(--text)] hover:text-[var(--highlight)] font-semibold text-3xl flex gap-1 cursor-pointer">
                 <Icon icon="ic:outline-arrow-right" :class="is_open ? 'rot' : ''" class="ica" height="40" /> {{ capitalizeFirstChar(title) }}
             </h2>
-            <div class="content" :class="!is_open ? 'hide' : ''">
+            <div ref="content" class="content" :class="!is_open ? 'hide' : ''">
                 <slot />
             </div>
         </div>
@@ -13,8 +13,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, toRefs } from 'vue'
-import { capitalizeFirstChar } from '@/utils'
+import { ref, onMounted, toRefs, watch } from 'vue'
+import { capitalizeFirstChar, convertTextSeparator } from '@/utils'
 
 import { Icon } from '@iconify/vue'
 
@@ -27,8 +27,21 @@ const props = defineProps({
 })
 const { tit: title, defOpen } = toRefs(props)
 
-// ========================== Process ==========================
+// ================= Process =================
 const is_open = ref(defOpen.value)
+const content = ref(null)
+onMounted(() => {
+    if (is_open.value) {
+        content.value.style.maxHeight = `${content.value.scrollHeight}px`
+    }
+})
+watch(is_open, (newValue) => {
+    if (newValue) {
+        content.value.style.maxHeight = `${content.value.scrollHeight}px`
+    } else {
+        content.value.style.maxHeight = '0'
+    }
+})
 </script>
 
 <style lang="scss">
@@ -36,12 +49,19 @@ const is_open = ref(defOpen.value)
     .row {
         .content {
             margin-left: 3.2rem;
-            height: max-content;
             color: var(--main);
+            overflow: hidden;
+            transition: max-height var(--hover-trans), opacity var(--hover-trans);
+            max-height: 0;
+            opacity: 0;
 
-            transition: all var(--hover-trans);
             &.hide {
-                height: 0px;
+                max-height: 0;
+                opacity: 0;
+            }
+
+            &:not(.hide) {
+                opacity: 1;
             }
         }
 

@@ -35,7 +35,7 @@
 /* ------------- Constant ------------- */
 
 .container {
-    max-width: 980px;
+    max-width: 1228px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -45,10 +45,6 @@
     font-weight: 500;
     color: var(--highlight);
     text-align: center;
-}
-
-.hide {
-    display: none;
 }
 
 /* ------------- Changer Container ------------- */

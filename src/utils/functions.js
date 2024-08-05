@@ -1,4 +1,54 @@
 // ==================== Active functions ====================
+
+export function findNextKey(obj, currKeyName) {
+    // Get all keys
+    const keys = Object.keys(obj)
+    const currKeyIndex = keys.findIndex((key) => key == currKeyName)
+    if (currKeyIndex != -1) {
+        if (currKeyIndex + 1 < keys.length) {
+            return keys[currKeyIndex + 1]
+        } else {
+            return keys[0]
+        }
+    }
+    return null
+}
+
+export function convertTextSeparator(str, CurrentSeparator = ' ', ExpectedSeparator = '_') {
+    return str.split(CurrentSeparator).join(ExpectedSeparator)
+}
+
+export function isValidURL(str) {
+    var pattern = new RegExp(
+        '^(https?:\\/\\/)?' + // protocol
+            '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+            '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+            '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+            '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+            '(\\#[-a-z\\d_]*)?$',
+        'i'
+    ) // fragment locator
+    return !!pattern.test(str)
+}
+
+export function isValidImageURL(url) {
+    // Check if the URL ends with a common image file extension
+    // const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg']
+    // const urlExtension = url.split('.').pop().toLowerCase()
+
+    // if (!imageExtensions.includes(urlExtension)) {
+    //     return Promise.resolve(false)
+    // }
+
+    // Try loading the image
+    return new Promise((resolve) => {
+        const img = new Image()
+        img.onload = () => resolve(true)
+        img.onerror = () => resolve(false)
+        img.src = url
+    })
+}
+
 // ----------------- for sound -----------------
 export function playAudio(aud, audioLoop = false) {
     if (!aud || aud == 'off' || aud == 'hide') return
@@ -107,6 +157,13 @@ export function makeNoScroll(ifTrue) {
         addClass(body, 'noscroll')
     } else {
         removeClass(body, 'noscroll')
+    }
+}
+
+export function scrollToSection(id) {
+    const element = document.getElementById(id)
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
     }
 }
 

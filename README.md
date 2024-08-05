@@ -140,3 +140,9 @@ async function replaceSpecialCharacters() {
 
 replaceSpecialCharacters()
 ```
+
+```sh
+npm install pinia-plugin-persistedstate
+```
+
+[to persist state of the setting or any else for the stores of the project]

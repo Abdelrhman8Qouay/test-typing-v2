@@ -15,8 +15,12 @@
             </div>
             <div class="right">
                 <div class="relative" tabindex="0">
-                    <span class="flex justify-center items-center opt" @click.self="open_color_mode_menu = !open_color_mode_menu" :class="open_color_mode_menu ? '!text-[var(--highlight)]' : ''">
-                        <Icon icon="unjs:theme-colors" class="mx-1 inline-block" />
+                    <span
+                        class="flex justify-center items-center opt !text-base"
+                        @click.self="open_color_mode_menu = !open_color_mode_menu"
+                        :class="open_color_mode_menu ? '!text-[var(--highlight)]' : ''"
+                    >
+                        <Icon icon="mdi:theme-light-dark" class="mx-1 inline-block" />
                         {{ compo_game_setting.theme.theme.as }}</span
                     >
                     <ul
@@ -28,7 +32,7 @@
                             v-for="(val, i) in Object.keys(settingStore.color_modes)"
                             :key="i"
                             :tabindex="i"
-                            @click="settingStore.toggleMode(val)"
+                            @click="settingStore.toggleMode(val, compo_game_setting.theme.theme.as)"
                         >
                             <div class="balls flex justify-items-start items-center gap-1 bg-[var(--sub)] mx-1 p-1 px-2 rounded-md" :class="settingStore.color_modes[val]">
                                 <div class="ball w-4 h-4 bg-[var(--main)] rounded-full"></div>

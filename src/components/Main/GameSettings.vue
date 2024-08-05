@@ -19,7 +19,7 @@
                             <div class="bg-[var(--sub)] rounded-full py-1"><Icon :icon="settingStore.setting_of_paras[type].icon" /></div>
                         </div>
                         <div>{{ set }} Test</div>
-                        <Button class="!bg-[var(--main)] !text-[var(--bg)] w-max" @click.prevent="openGame(type, set)" :is-button="true" txt="Typing test" ico="ic:sharp-arrow-right" :ico-size="22" />
+                        <Button class="!bg-[var(--main)] !text-[var(--bg)] w-max" @click="openGame(type, set)" :is-button="true" txt="Typing test" ico="ic:sharp-arrow-right" :ico-size="22" />
                     </div>
                 </div>
             </div>

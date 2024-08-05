@@ -184,19 +184,6 @@
                         </div>
                     </div>
                 </transition>
-
-                <div class="w-full h-max flex justify-center items-center mt-10">
-                    <div class="flex flex-col gap-2">
-                        <div class="text-[var(--text)] text-sm flex justify-center items-center gap-1">
-                            <div class="bg-[var(--sub)] rounded px-2 py-1 text-[var(--text)]">{{ compo_game_setting.behavior['quick restart'].as }}</div>
-                            key - restart test
-                        </div>
-                        <!-- <div class="text-[var(--text)] text-sm">
-                            <div class="bg-[var(--sub)] rounded-md px-2 py-1 text-[var(--text)]">{{ compo_game_setting.behavior['quick restart'].as }}</div>
-                            restart test
-                        </div> -->
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -301,6 +288,25 @@ const capsLockedEle = ref(null)
 onBeforeUnmount(() => endGame())
 
 // ===================== Game Functions =====================
+
+// Define the event listener functions separately
+const handleUserFocus = (e) => {
+    if (strToBool(compo_game_setting.value['hide elements']['out of focus warning'].as)) {
+        UserFocus(e)
+    }
+}
+const handleCapsLockWarn = (e) => {
+    if (strToBool(compo_game_setting.value['hide elements']['caps lock warning'].as)) {
+        CapsLockWarn(e)
+    }
+}
+const handleQuickRestart = (e) => {
+    const currQRestartKey = compo_game_setting.value['behavior']['quick restart'].as
+    if (strToBool(currQRestartKey, true)) {
+        QuickRestart(e, currQRestartKey)
+    }
+}
+
 // ------------------ Start & End game ------------------
 async function startGame() {
     try {
@@ -321,24 +327,9 @@ async function startGame() {
         // then add the paragraph
         addParagraph()
 
-        // to check user focus
-        if (strToBool(compo_game_setting.value['hide elements']['out of focus warning'].as)) {
-            window.addEventListener('click', (e) => UserFocus(e))
-        }
-
-        document.addEventListener('keydown', (e) => {
-            // to check Caps Lock
-            if (strToBool(compo_game_setting.value['hide elements']['caps lock warning'].as)) {
-                CapsLockWarn(e)
-            }
-
-            // to check Quick restart
-            const currQRestartKey = compo_game_setting.value['behavior']['quick restart'].as
-            if (strToBool(currQRestartKey, true)) {
-                // if not 'off'
-                QuickRestart(e, currQRestartKey)
-            }
-        })
+        document.addEventListener('click', handleUserFocus)
+        document.addEventListener('keydown', handleCapsLockWarn)
+        document.addEventListener('keydown', handleQuickRestart)
 
         // play background audio
         // backgroundAudio.value = new Audio(getImageUrl(current_para.value.audio))
@@ -356,24 +347,9 @@ function endGame() {
     // put the result of the last game
     setUserInfo()
 
-    // remove the event listener
-    if (strToBool(compo_game_setting.value['hide elements']['out of focus warning'].as)) {
-        window.removeEventListener('click', (e) => UserFocus(e))
-    }
-
-    document.removeEventListener('keydown', (e) => {
-        // to check Caps Lock
-        if (strToBool(compo_game_setting.value['hide elements']['caps lock warning'].as)) {
-            CapsLockWarn(e)
-        }
-
-        // to check Quick restart
-        const currQRestartKey = compo_game_setting.value['behavior']['quick restart'].as
-        if (strToBool(currQRestartKey, true)) {
-            // if not 'off'
-            QuickRestart(e, currQRestartKey)
-        }
-    })
+    document.removeEventListener('click', handleUserFocus)
+    document.removeEventListener('keydown', handleCapsLockWarn)
+    document.removeEventListener('keydown', handleQuickRestart)
 
     // hide game
     showBoard.value = true
@@ -389,12 +365,11 @@ function getHandledPara(paras) {
 
     let curr_para = paras[randomParaIndex]
     if (strToBool(compo_game_setting.value['when input']['lazy mode'].as)) {
-        console.log('para before >>', curr_para)
         curr_para = replaceSpecialCharacters(curr_para)
     }
 
     // (return to default) (get the content of the paragraph)
-    const wordsArray = curr_para.split(' ') || []
+    const wordsArray = curr_para.split(' ').filter((w) => w != '' || !isSpaceChar(w)) || []
     splittedContent.value = []
     para_content_text.value = ''
     game_timeout.value = 0
@@ -461,7 +436,7 @@ function typing(e) {
 function spacePressed(e, input_char_index) {
     const inputEle = e.target
 
-    // if input Empty >> stop add new char for {input writer} | // if input == content[currWord] >>> continue
+    // if input Empty >> stop space for {input writer} | if input == content[currWord] >>> continue
     if (inputEle.value.trim().length <= 0) {
         if (hasClass(inputEle, 'error')) {
             removeClass(inputEle, 'error')
@@ -683,7 +658,7 @@ function keyActivated(e) {
             return
         }
 
-        // --------------------- process to go back ---------------------
+        // ================= process the previous method =================
         // get the previous word
         const prevWord = splittedContent.value[words_done.value.words - 1]
 
@@ -705,20 +680,30 @@ function keyActivated(e) {
 
             prev_first_letter_i++
         }
-
-        // to the last letter in the prev word
-        letters_recorded.value.total--
-        if (hasClass(para_letters.value[prev_first_letter_i], 'done')) {
-            letters_recorded.value.correct--
+        // if last letter has an error >> incorrect word
+        if (hasClass(para_letters.value[prev_first_letter_i], 'error')) {
+            correctWord = false
         }
-        words_done.value.words--
-        if (correctWord) {
-            words_done.value.correct--
-        }
-        letterBack(para_char_num.value, prev_first_letter_i)
-        para_char_num.value = prev_first_letter_i
 
-        playClick(soundOnClick.value, soundVolume.value)
+        // off & correct = nothing | off & not correct = go back  |  on = go back
+        if (compo_game_setting.value['when input']['freedom mode'].as == 'off' && correctWord) {
+            inputEle.value = ''
+            return
+        } else {
+            // to the last letter in the prev word
+            words_done.value.words--
+            if (correctWord) {
+                words_done.value.correct--
+            }
+            letters_recorded.value.total--
+            if (hasClass(para_letters.value[prev_first_letter_i], 'done')) {
+                letters_recorded.value.correct--
+            }
+            letterBack(para_char_num.value, prev_first_letter_i)
+            para_char_num.value = prev_first_letter_i
+
+            playClick(soundOnClick.value, soundVolume.value)
+        }
     }
 }
 
@@ -750,7 +735,7 @@ function checkGameTime(isTimer) {
 // get the activated key as info(code >> KeyQ, key >> q or Q)
 
 function UserFocus(e) {
-    if (!e.target || !writerBoxEle.value || !outOfFocusEle.value || !paraContainerEle.value || !inputWriter.value) return
+    if (!e.target) return
     let curr = e.target
     if (curr == inputWriter.value || curr == paraContainerEle.value || curr == outOfFocusEle.value) {
         focusInput(inputWriter.value)
@@ -761,7 +746,7 @@ function UserFocus(e) {
 }
 
 function QuickRestart(e, restart_key) {
-    if (!e.target || !writerBoxEle.value || !paraContainerEle.value || !inputWriter.value) return
+    if (!e.target) return
     const map = { tab: 'Tab', enter: 'Enter', esc: 'Escape' }
     const curr_key = map[restart_key]
 
@@ -772,7 +757,7 @@ function QuickRestart(e, restart_key) {
 }
 
 function CapsLockWarn(e) {
-    if (!e.target || !writerBoxEle.value || !outOfFocusEle.value || !paraContainerEle.value || !inputWriter.value) return
+    if (!e.target) return
     if (isCapsLockActive(e)) {
         if (!hasClass(writerBoxEle.value, 'caps_lock_active')) addClass(writerBoxEle.value, 'caps_lock_active')
     } else {
@@ -1072,12 +1057,9 @@ function setUserInfo(to_default = false) {
 
         .gameLiveTime {
             @include flex-center-col;
-            border: 4px solid var(--highlight);
-            background: var(--text);
-            border-radius: 50%;
             padding: 1rem;
             h2 {
-                color: var(--sub);
+                color: var(--text);
                 font-size: 20px;
                 font-weight: 500;
             }

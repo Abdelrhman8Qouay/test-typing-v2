@@ -1,25 +1,33 @@
 <script setup>
 import { ref } from 'vue'
 
-const madeIn = ref(new Date().getFullYear())
+import { useSettingStore } from '@/stores'
+import { storeToRefs } from 'pinia'
+const { compo_game_setting } = storeToRefs(useSettingStore())
 </script>
 
 <template>
-    <div class="parent w-full p-3 !mt-80">
-        <div class="container h-full">
-            <div class="flex justify-between items-center gap-5 w-full">
-                <!-- Copyright -->
-                <div class="text-start p-1 text-white font-light text-sm flex flex-col">
-                    © {{ madeIn }} Copyright:
-                    <a class="text-gray-400 hover:text-white text-base transition" href="https://www.facebook.com/profile.php?id=100090009622327">Abdelrhman Ashraf (Qouay)</a>
+    <div class="footer w-full">
+        <div class="container">
+            <!-- Keys Used -->
+            <div class="w-full h-max flex justify-center items-center mt-10">
+                <div class="flex flex-col gap-2">
+                    <div class="text-[var(--text)] text-sm flex justify-center items-center gap-1">
+                        <div class="bg-[var(--sub)] rounded px-2 py-1 text-[var(--text)]">{{ compo_game_setting.behavior['quick restart'].as }}</div>
+                        key - restart test
+                    </div>
+                    <!-- <div class="text-[var(--text)] text-sm">
+                            <div class="bg-[var(--sub)] rounded-md px-2 py-1 text-[var(--text)]">{{ compo_game_setting.behavior['quick restart'].as }}</div>
+                            restart test
+                        </div> -->
                 </div>
-                <!-- Copyright -->
+            </div>
 
-                <div class="">
-                    <a href="https://www.facebook.com/profile.php?id=100090009622327" target="_blank" class="text-white">
-                        <img class="w-8 aspect-square object-cover hover:opacity-70 transition-all" src="@/assets/logo.png" alt="owner avatar" />
-                    </a>
-                </div>
+            <!-- About Owner -->
+            <div class="w-full h-full flex justify-center items-center p-3 mt-10">
+                <p class="text-[var(--text)]">
+                    Created By <a class="text-[var(--highlight)] font-semibold" target="_blank" href="https://abdelrhmanqouayportfolio.netlify.app/"> -Abdelrhman Ashraf- </a> With 💖
+                </p>
             </div>
         </div>
     </div>
